@@ -1,0 +1,1 @@
+# NOPI-Nota-Pintar-AI
