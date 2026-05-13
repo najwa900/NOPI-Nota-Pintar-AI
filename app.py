@@ -2,107 +2,113 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import numpy as np
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(
-    page_title="Dashboard Nota Pintar (NOPI)",
-    page_icon="📄",
-    layout="wide"
-)
+st.set_page_config(page_title="Nota Pintar - DS-2 Dashboard", layout="wide")
 
-# --- FUNGSI LOAD DATA (Caching agar cepat) ---
+# --- LOAD DATA ---
 @st.cache_data
 def load_data():
-    # Pastikan file ini ada di folder 'data/' di GitHub kamu
-    try:
-        df = pd.read_csv('data/df_all.csv')
-        return df
-    except:
-        # Data cadangan jika file tidak ditemukan saat pertama kali setup
-        return pd.DataFrame({
-            'label': ['struk']*1014 + ['non_struk']*1014,
-            'width': np.random.normal(689, 754, 2028).clip(180, 6720),
-            'aspect_ratio': np.random.uniform(0.2, 1.5, 2028)
-        })
+    # Mengambil data dari folder 'data' yang sudah kamu buat
+    df = pd.read_csv('data/df_all.csv')
+    return df
 
-df_all = load_data()
+try:
+    df_all = load_data()
+except Exception as e:
+    st.error(f"Gagal memuat data: {e}")
+    st.stop()
 
-# --- SIDEBAR ---
-st.sidebar.title("Navigasi Dashboard")
-st.sidebar.info("Proyek: Nota Pintar (NOPI)\nLayer: DS-2 (Analysis & Insight)")
-menu = st.sidebar.radio("Pilih Analisis:", ["Ringkasan Data", "Analisis Geometris", "Performa Model AI"])
+# --- SIDEBAR NAVIGASI ---
+st.sidebar.title("📌 Menu Utama")
+menu = st.sidebar.radio("Pilih Halaman:", 
+                        ["Ringkasan & EDA", "Analisis Resolusi (OCR)", "Performa Model AI"])
 
-# --- MENU 1: RINGKASAN DATA ---
-if menu == "Ringkasan Data":
-    st.header("📊 Ringkasan Distribusi Dataset")
+# --- 1. HALAMAN RINGKASAN & EDA ---
+if menu == "Ringkasan & EDA":
+    st.title("📊 EDA — Komposisi Dataset")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader("Jumlah Data per Kelas")
-        fig, ax = plt.subplots()
-        sns.countplot(data=df_all, x='label', palette='viridis', ax=ax)
-        st.pyplot(fig)
-        st.write("**Insight:** Dataset seimbang antara kelas Struk dan Non-Struk, mencegah model menjadi bias.")
+        st.write("### Distribusi Kelas (Struk vs Non-Struk)")
+        fig1, ax1 = plt.subplots(figsize=(7, 5))
+        label_counts = df_all['label'].value_counts()
+        ax1.bar(label_counts.index, label_counts.values, color=['#4CAF50','#FF5722'], edgecolor='white')
+        for i, v in enumerate(label_counts.values):
+            ax1.text(i, v+5, str(v), ha='center', fontweight='bold')
+        st.pyplot(fig1)
 
     with col2:
-        st.subheader("Persentase Komposisi")
-        fig, ax = plt.subplots()
-        counts = df_all['label'].value_counts()
-        ax.pie(counts, labels=counts.index, autopct='%1.1f%%', startangle=140, colors=['#4CAF50', '#FF5722'])
-        st.pyplot(fig)
-        st.write("**Insight:** Distribusi 50:50 ideal untuk pelatihan model klasifikasi biner.")
-
-# --- MENU 2: ANALISIS GEOMETRIS ---
-elif menu == "Analisis Geometris":
-    st.header("📈 Analisis Resolusi & Bentuk Gambar")
+        st.write("### Distribusi Sumber Data (Source)")
+        fig2, ax2 = plt.subplots(figsize=(7, 5))
+        src_counts = df_all['source'].value_counts()
+        colors = ['#2196F3','#FF9800','#9C27B0','#E91E63','#00BCD4']
+        ax2.bar(src_counts.index, src_counts.values, color=colors[:len(src_counts)], edgecolor='white')
+        st.pyplot(fig2)
     
-    tab1, tab2 = st.tabs(["Tren Lebar (Width)", "Aspect Ratio (Pola Bentuk)"])
+    st.info("**Insight:** Dataset memiliki keseimbangan kelas yang sempurna (50:50), yang sangat baik untuk menghindari bias pada model klasifikasi.")
+
+# --- 2. HALAMAN ANALISIS RESOLUSI (OCR) ---
+elif menu == "Analisis Resolusi (OCR)":
+    st.title("🔍 Analisis Kualitas Gambar & Outlier")
     
-    with tab1:
-        st.subheader("Tren Distribusi Lebar Gambar")
-        sorted_width = np.sort(df_all['width'].values)
-        fig, ax = plt.subplots(figsize=(10, 4))
-        ax.plot(sorted_width, color='orange', linewidth=2)
-        ax.set_ylabel("Width (Pixel)")
-        ax.set_xlabel("Urutan Data")
-        st.pyplot(fig)
-        st.warning("**Insight Outlier:** Lonjakan tajam di ujung grafik menunjukkan adanya gambar dengan resolusi ekstrem (>2000px) yang perlu di-resize.")
+    # --- HISTOGRAM RESOLUSI ---
+    st.write("### Distribusi Resolusi per Kelas")
+    fig3, axes3 = plt.subplots(1, 2, figsize=(14, 5))
+    
+    # Width Histogram
+    axes3[0].hist(df_all[df_all['label']=='struk']['width'], bins=30, alpha=0.6, color='#4CAF50', label='Struk')
+    axes3[0].hist(df_all[df_all['label']=='non_struk']['width'], bins=30, alpha=0.6, color='#FF5722', label='Non-Struk')
+    axes3[0].set_title('Distribusi Lebar (Width)')
+    axes3[0].legend()
 
-    with tab2:
-        st.subheader("Perbandingan Bentuk (Aspect Ratio)")
-        fig, ax = plt.subplots()
-        sns.boxplot(x='label', y='aspect_ratio', data=df_all, palette='Pastel1', ax=ax)
-        st.pyplot(fig)
-        st.write("**Insight Geometris:** Label 'Struk' secara konsisten memiliki aspect ratio rendah (Portrait), menjadikannya ciri khas utama pembeda.")
+    # Height Histogram
+    axes3[1].hist(df_all[df_all['label']=='struk']['height'], bins=30, alpha=0.6, color='#4CAF50', label='Struk')
+    axes3[1].hist(df_all[df_all['label']=='non_struk']['height'], bins=30, alpha=0.6, color='#FF5722', label='Non-Struk')
+    axes3[1].set_title('Distribusi Tinggi (Height)')
+    axes3[1].legend()
+    st.pyplot(fig3)
 
-# --- MENU 3: PERFORMA MODEL AI ---
+    # --- LINE CHART & BOXPLOT ---
+    col3, col4 = st.columns(2)
+    with col3:
+        st.write("### Tren Lebar Gambar (Sorted)")
+        fig4, ax4 = plt.subplots()
+        sorted_width = df_all['width'].sort_values().values
+        ax4.plot(sorted_width, color='orange', linewidth=2)
+        st.pyplot(fig4)
+    
+    with col4:
+        st.write("### Outlier: Aspect Ratio")
+        fig5, ax5 = plt.subplots()
+        sns.boxplot(x='label', y='aspect_ratio', data=df_all, palette='Pastel1', ax=ax5)
+        st.pyplot(fig5)
+
+    st.warning("**Insight OCR:** Gambar dengan width > 2000px diidentifikasi sebagai outlier. Sebaliknya, gambar < 200px berisiko pecah saat diproses OCR.")
+
+# --- 3. HALAMAN PERFORMA MODEL AI ---
 elif menu == "Performa Model AI":
-    st.header("🎯 Evaluasi Performa Model CNN")
+    st.title("🎯 Evaluasi Model Klasifikasi")
     
-    col_m1, col_m2, col_m3 = st.columns(3)
-    col_m1.metric("Akurasi", "95%", "Target: 90%")
-    col_m2.metric("Precision", "100%", "Sangat Stabil")
-    col_m3.metric("Recall", "90%", "Perlu Perbaikan")
+    # Simulasi metrik
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Accuracy", "95%")
+    c2.metric("Precision", "100%")
+    c3.metric("Recall", "90%")
 
-    st.divider()
+    st.write("### Confusion Matrix")
+    # Simulasi data sesuai yang kamu buat
+    y_true = [1]*50 + [0]*50
+    y_pred = y_true.copy()
+    for i in range(5): y_pred[i] = 0 # simulasi 5 error
     
-    col_cm, col_txt = st.columns([2, 1])
+    cm = confusion_matrix(y_true, y_pred)
+    fig6, ax6 = plt.subplots(figsize=(6, 4))
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['Non-Struk', 'Struk'])
+    disp.plot(cmap='Blues', ax=ax6)
+    st.pyplot(fig6)
     
-    with col_cm:
-        # Simulasi Confusion Matrix sesuai data sebelumnya
-        cm = np.array([[48, 0], [5, 47]])
-        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['Non-Struk', 'Struk'])
-        fig, ax = plt.subplots()
-        disp.plot(cmap='Blues', ax=ax)
-        st.pyplot(fig)
-        
-    with col_txt:
-        st.subheader("Kesimpulan Performa")
-        st.write("""
-        - **False Positive (0):** Model tidak pernah salah mengira gambar biasa sebagai struk.
-        - **False Negative (5):** Ada 5 struk yang gagal dikenali, kemungkinan karena resolusi terlalu rendah.
-        - **Rekomendasi:** Tambahkan data struk yang variatif untuk meningkatkan Recall.
-        """)
+    st.success("**Insight Transaksi:** Model sangat aman (tidak ada False Positive), artinya sistem tidak akan salah memproses gambar sampah sebagai struk belanja.")
