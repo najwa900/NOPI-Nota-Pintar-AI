@@ -152,7 +152,7 @@ elif menu == "Analisis Resolusi (OCR)":
         "namun terdapat lonjakan drastis pada sebagian kecil data yang mencapai hampir 7.000 piksel.\n\n"
         "Implikasi Bisnis: Gambar dengan resolusi yang terlalu ekstrem (sangat lebar) berpotensi "
         "memperlambat waktu pemrosesan model AI (latency) dan meningkatkan konsumsi memori saat ekstraksi dilakukan.\n\n"
-        "Outlier Aspect Ratio (Struk vs Non-Struk)\n"
+        "Outlier Aspect Ratio (Struk vs Non-Struk)\n\n"
         "Konsistensi Struk: Kelompok data bertanda 'struk' memiliki aspect ratio yang sangat konsisten dan rapat "
         "(mendekati 1.0), menunjukkan bentuk dokumen yang seragam.\n\n"
         "Anomali Non-Struk: Pada kelompok 'non_struk', terdapat banyak outlier dengan aspect ratio tinggi "
@@ -192,6 +192,5 @@ elif menu == "Performa Model AI":
     st.pyplot(fig6)
 
     st.success(
-        "**Insight Transaksi:** Model sangat aman (tidak ada False Positive), "
-        "artinya sistem tidak akan salah memproses gambar sampah sebagai struk belanja."
+        "**Insight Transaksi:** "
     )
