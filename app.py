@@ -147,7 +147,7 @@ elif menu == "Analisis Resolusi (OCR)":
         st.pyplot(fig5)
 
     st.warning(
-        "**Width Trend\n"
+        "Width Trend\n\n"
         "Variasi Ukuran: Sebagian besar data memiliki lebar gambar di bawah 2.000 piksel, "
         "namun terdapat lonjakan drastis pada sebagian kecil data yang mencapai hampir 7.000 piksel.\n\n"
         "Implikasi Bisnis: Gambar dengan resolusi yang terlalu ekstrem (sangat lebar) berpotensi "
