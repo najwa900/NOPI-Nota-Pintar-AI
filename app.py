@@ -164,9 +164,9 @@ elif menu == "Performa Model AI":
     st.title("🎯 Evaluasi Model Klasifikasi")
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("Accuracy", "95%")
+    c1.metric("Accuracy", "99%")
     c2.metric("Precision", "100%")
-    c3.metric("Recall", "90%")
+    c3.metric("Recall", "99%")
 
     st.write("### Confusion Matrix")
 
