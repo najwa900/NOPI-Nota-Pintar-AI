@@ -171,49 +171,244 @@ elif menu == "BQ1: Performa OCR":
 # --- BQ2: ESTIMASI LABA ---
 elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
+    st.markdown("Sistem menghitung perkiraan laba secara otomatis berdasarkan total pengeluaran item struk belanja dan persentase margin keuntungan yang ditentukan pengguna.")
     
-    st.write("Sistem menghitung laba berdasarkan asumsi margin yang diinput pengguna.")
-    
+    # Interaksi slider kustom margin untung (Default sesuai notebook: 20%)
     margin = st.slider("Input Asumsi Margin Laba (%)", 5, 50, 20)
     
-    # Hitung Laba
+    # Hitung Laba secara dinamis berdasarkan input slider
     df_laba = df_clean[['nama_barang', 'jumlah_barang', 'harga_satuan', 'total_harga_item']].copy()
-    df_laba['Laba Estimasi'] = df_laba['total_harga_item'] * (margin/100)
     
-    st.subheader(f"Estimasi Laba per Item (Margin {margin}%)")
-    st.dataframe(df_laba.head(10))
+    # Menghitung laba total per item sesuai logika notebook (Total Harga dikali Persentase Margin)
+    df_laba['laba_total'] = df_laba['total_harga_item'] * (margin / 100)
     
-    # Grafik Laba Teratas
-    top_laba = df_laba.sort_values('Laba Estimasi', ascending=False).head(10)
-    fig2, ax2 = plt.subplots()
-    sns.barplot(x="Laba Estimasi", y="nama_barang", data=top_laba, palette="magma", ax=ax2)
-    ax2.set_title("Top 10 Produk Berdasarkan Kontribusi Laba")
-    st.pyplot(fig2)
-
-# --- BQ3: LAPORAN TRANSAKSI ---
-elif menu == "BQ3: Laporan Transaksi":
-    st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur?")
+    # Menampilkan Ringkasan Metrik Laba
+    total_estimasi_laba = df_laba['laba_total'].sum()
+    st.metric(label=f"Total Estimasi Laba Keseluruhan (Margin {margin}%)", value=f"Rp {total_estimasi_laba:,.0f}")
     
-    # Metrik Ringkasan
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Total Item Bersih", len(df_clean))
-    m2.metric("Median Harga", f"Rp {df_clean['harga_satuan'].median():,.0f}")
-    m3.metric("Item Paling Banyak Dibeli", df_clean['nama_barang'].mode()[0])
+    st.subheader(f"Tabel Estimasi Laba per Item (Margin {margin}%)")
+    st.dataframe(df_laba.head(10), use_container_width=True)
     
     st.divider()
     
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.subheader("Distribusi Kategori Harga")
-        fig3, ax3 = plt.subplots()
-        df_clean['kategori_harga'].value_counts().plot(kind='pie', autopct='%1.1f%%', ax=ax3, colors=sns.color_palette("pastel"))
-        ax3.set_ylabel("")
-        st.pyplot(fig3)
+    # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart sesuai Notebook)
+    st.subheader(f"📊 Top 15 Komoditas Berdasarkan Estimasi Laba (Margin {margin}%)")
+    
+    # Filter dan urutkan data sesuai komponen notebook
+    df_plot = (
+        df_laba[df_laba['laba_total'] > 0]
+        .sort_values('laba_total')
+        .tail(15)
+    )
+    
+    if not df_plot.empty:
+        # Menggunakan format subplots dengan ukuran proporsional
+        fig, ax = plt.subplots(figsize=(11, 6))
         
-    with col_b:
-        st.subheader("Data Transaksi Terstruktur (Final)")
-        st.write("Data ini siap digunakan untuk pembukuan digital.")
-        st.dataframe(df_clean[['nama_toko', 'tanggal', 'nama_barang', 'harga_satuan', 'kategori_harga']].head(15))
+        # Membuat Horizontal Bar Chart (barh) sesuai notebook
+        bars = ax.barh(
+            df_plot['nama_barang'],
+            df_plot['laba_total'],
+            color='mediumseagreen',
+            alpha=0.85,
+            edgecolor='white'
+        )
+        
+        # Menambahkan label harga format rupiah pada batang grafik
+        ax.bar_label(bars, fmt='Rp %.0f', padding=3, fontsize=9)
+        
+        # Menambahkan metadata judul dan label axis
+        ax.set_title(f'BQ2 — Estimasi Laba per Item (Margin {margin}%)', fontweight='bold', fontsize=12)
+        ax.set_xlabel('Estimasi Laba Total (Rp)', fontsize=10)
+        ax.set_ylabel('Nama Barang', fontsize=10)
+        
+        plt.tight_layout()
+        st.pyplot(fig)
+    else:
+        st.warning("Tidak ada data produk dengan estimasi laba di atas Rp 0 untuk ditampilkan pada grafik.")
+
+    st.divider()
+
+    # ### Insight BQ2 RESMI DARI NOTEBOOK ###
+    st.subheader("💡 Insight Analisis Pertanyaan Bisnis 2")
+    st.markdown(f"""
+    Dengan input persentase margin dari pengguna, sistem dapat langsung menghitung estimasi laba per item tanpa perlu memasukkan harga beli satu per satu. Berdasarkan demo struk `primer_0079.jpg` dengan margin {margin}%, total omzet struk sebesar **Rp 67.100** menghasilkan estimasi laba **Rp {67100 * (margin/100):,.0f}** *(Catatan: Nilai ini disesuaikan secara dinamis oleh slider).*
+
+    Item dengan kontribusi laba tertinggi adalah **Kanzlr Bakso Ori 48G** karena dibeli 2 unit, diikuti **Nutrijel Pwd.Strw.15**. Pola ini menunjukkan bahwa item dengan jumlah beli lebih dari 1 unit berkontribusi lebih besar terhadap total laba meskipun harga satuannya tidak selalu tertinggi.
+
+    Pendekatan ini praktis untuk pelaku UMKM yang tidak memiliki sistem pencatatan harga beli terstruktur — cukup input satu angka margin, sistem langsung menghasilkan laporan laba per item yang siap digunakan untuk pembukuan sederhana.
+    """)
+
+# --- BQ3: LAPORAN TRANSAKSI ---
+# --- BQ3: LAPORAN TRANSAKSI ---
+elif menu == "BQ3: Laporan Transaksi":
+    st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur?")
+    st.markdown("Hasil konversi dari teks mentah OCR nota belanja menjadi basis data tabel transaksional terstruktur yang siap pakai untuk pembukuan digital.")
+    
+    # Perlu import matplotlib ticker untuk memformat sumbu X pada histogram
+    import matplotlib.ticker as mticker
+
+    # Metrik Ringkasan
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Total Item Bersih", len(df_clean))
+    m2.metric("Median Harga Satuan", f"Rp {df_clean['harga_satuan'].median():,.0f}")
+    
+    mode_item = df_clean['nama_barang'].mode()
+    m3.metric("Item Paling Banyak Dibeli", mode_item[0] if not mode_item.empty else "N/A")
+    
+    st.divider()
+    
+    # 1. VISUALISASI GRID: DISTRIBUSI DATA TRANSAKSI (1x2)
+    st.subheader("📊 Distribusi Komponen Transaksi")
+    
+    df_harga = df_clean[df_clean['harga_satuan'] > 0]
+    median_harga = df_harga['harga_satuan'].median()
+
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+    # Chart 1: Distribusi harga satuan
+    axes[0].hist(
+        df_harga['harga_satuan'],
+        bins=30,
+        color='steelblue',
+        alpha=0.8,
+        edgecolor='white'
+    )
+    axes[0].axvline(
+        median_harga,
+        color='tomato',
+        linestyle='--',
+        linewidth=2,
+        label=f'Median: Rp {median_harga:,.0f}'
+    )
+    axes[0].set_title('Distribusi Harga Satuan Item', fontweight='bold')
+    axes[0].set_xlabel('Harga Satuan (Rp)')
+    axes[0].set_ylabel('Frekuensi')
+    axes[0].xaxis.set_major_formatter(
+        mticker.FuncFormatter(lambda x, _: f'{x/1000:.0f}rb')
+    )
+    axes[0].legend()
+
+    # Chart 2: Distribusi jumlah barang
+    jumlah_counts = df_clean['jumlah_barang'].value_counts().sort_index().head(10)
+
+    bars1 = axes[1].bar(
+        jumlah_counts.index.astype(str),
+        jumlah_counts.values,
+        color='mediumseagreen',
+        alpha=0.85,
+        edgecolor='white'
+    )
+    axes[1].bar_label(bars1, padding=3)
+    axes[1].set_title('Distribusi Jumlah Barang per Baris Transaksi', fontweight='bold')
+    axes[1].set_xlabel('Jumlah Barang')
+    axes[1].set_ylabel('Frekuensi')
+
+    plt.suptitle('BQ3 — Distribusi Data Transaksi', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    st.pyplot(fig)
+    
+    st.divider()
+
+    col_plots, col_table = st.columns([1, 1])
+
+    with col_plots:
+        # 2. VISUALISASI SEGMENTASI KATEGORI HARGA
+        st.subheader("🍕 Segmentasi Berdasarkan Kategori Harga")
+        
+        kat_order = [
+            'Sangat Murah (<=5rb)',
+            'Murah (5-20rb)',
+            'Sedang (20-50rb)',
+            'Mahal (50-100rb)',
+            'Sangat Mahal (>100rb)'
+        ]
+        kat_counts = df_clean['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
+
+        fig2, ax2 = plt.subplots(figsize=(8, 5))
+        colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
+
+        bars2 = ax2.barh(
+            kat_counts.index,
+            kat_counts.values,
+            color=colors_kat,
+            alpha=0.85,
+            edgecolor='white'
+        )
+        ax2.bar_label(bars2, padding=3, fontsize=10)
+        ax2.set_title('BQ3 — Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
+        ax2.set_xlabel('Jumlah Item')
+        
+        plt.tight_layout()
+        st.pyplot(fig2)
+
+    with col_table:
+        # TAMPILKAN TABEL DATA TERSTRUKTUR
+        st.subheader("📂 Pratinjau Lembar Dokumen Transaksi")
+        st.write("Data transaksional terstruktur yang siap dipakai:")
+        st.dataframe(
+            df_clean[['nama_toko', 'tanggal', 'nama_barang', 'harga_satuan', 'kategori_harga']].head(12), 
+            use_container_width=True
+        )
+
+    st.divider()
+
+    # 3. GENERASI DATA AGREGASI & VISUALISASI TOP STRUK
+    st.subheader("📈 Laporan Akumulasi Finansial Per Struk Nota Belanja")
+    
+    # Membuat dataframe laporan_struk_filtered secara dinamis (berdasarkan filename atau nama_toko)
+    # Menggunakan 'filename' jika ada, atau fallback ke 'nama_toko' untuk mengelompokkan struk
+    group_col = 'filename' if 'filename' in df_clean.columns else 'nama_toko'
+    
+    laporan_struk_filtered = df_clean.groupby(group_col).agg(
+        total_transaksi=('total_harga_item', 'sum')
+    ).reset_index()
+    
+    # Penyesuaian nama kolom untuk kebutuhan plotting
+    if group_col != 'filename':
+        laporan_struk_filtered = laporan_struk_filtered.rename(columns={group_col: 'filename'})
+
+    top_struk = (
+        laporan_struk_filtered
+        .sort_values('total_transaksi', ascending=False)
+        .head(10)
+        .sort_values('total_transaksi')
+    )
+
+    if not top_struk.empty:
+        fig3, ax3 = plt.subplots(figsize=(12, 5))
+
+        bars3 = ax3.barh(
+            top_struk['filename'],
+            top_struk['total_transaksi'],
+            color='mediumpurple',
+            alpha=0.85,
+            edgecolor='white'
+        )
+        ax3.bar_label(bars3, fmt='Rp %.0f', padding=3, fontsize=9)
+        ax3.set_title('BQ3 — Struk Teratas berdasarkan Total Transaksi Valid', fontweight='bold')
+        ax3.set_xlabel('Total Transaksi (Rp)')
+
+        plt.tight_layout()
+        st.pyplot(fig3)
+    else:
+        st.warning("Data struk tidak ditemukan untuk membuat grafik komparasi akumulasi.")
+
+    st.divider()
+
+    # ### Insight BQ3 RESMI DARI NOTEBOOK ###
+    st.subheader("💡 Insight Analisis Pertanyaan Bisnis 3")
+    st.markdown("""
+    Data transaksi hasil OCR berhasil diolah menjadi laporan terstruktur setelah melalui proses *cleaning* dan *feature engineering*.
+
+    Sekitar 69% item berada pada kategori Murah (5–20rb) dan Sedang (20–50rb) dengan median harga satuan Rp 15.145, mencerminkan pola belanja kebutuhan sehari-hari. Hanya sebagian kecil item masuk kategori Mahal dan Sangat Mahal, masing-masing 9 item.
+
+    Mayoritas transaksi bersifat satuan (1 unit per baris), bukan grosir. Dataset mencakup berbagai jenis toko mulai dari minimarket, warung, kafe, hingga apotek.
+
+    Data dapat diagregasi menjadi laporan ringkas per struk yang memuat nama toko, tanggal, total item, total transaksi, dan estimasi laba. Dengan asumsi margin 20%, sistem dapat langsung menghasilkan estimasi laba tanpa input harga beli manual, sehingga praktis untuk pembukuan sederhana pelaku UMKM.
+
+    > **Catatan Teknis Sidang:** Beberapa nama toko dan nilai total transaksi masih mengandung *noise* OCR residual. Normalisasi nama toko lebih lanjut dapat dilakukan menggunakan teknik *fuzzy matching* pada tahap pengembangan berikutnya.
+    """)
 
 # Footer
 st.caption("Copyright © 2024 | Proyek NOPI AI Analysis Dashboard")
