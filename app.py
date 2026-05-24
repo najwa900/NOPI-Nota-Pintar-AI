@@ -302,11 +302,12 @@ elif menu == "BQ2: Estimasi Laba":
     Pendekatan ini praktis untuk pelaku UMKM yang tidak memiliki sistem pencatatan harga beli terstruktur — cukup input satu angka margin, sistem langsung menghasilkan laporan laba per item yang siap digunakan untuk pembukuan sederhana.
     """)
 
+
 # --- BQ3: LAPORAN TRANSAKSI ---
 # --- BQ3: LAPORAN TRANSAKSI ---
 elif menu == "BQ3: Laporan Transaksi":
     st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur untuk mendukung pengambilan keputusan bisnis?")
-    st.markdown("Mentransformasikan hasil ekstraksi teks acak dokumen nota belanja menjadi ringkasan eksekutif finansial bulanan untuk menunjang strategi bisnis UMKM.")
+    st.markdown("Mentransformasikan hasil ekstraksi teks acak dokumen nota belanja menjadi laporan finansial terstruktur untuk menunjang strategi bisnis UMKM.")
     
     import matplotlib.ticker as mticker
 
@@ -340,20 +341,7 @@ elif menu == "BQ3: Laporan Transaksi":
     ].copy()
 
     # ==========================================
-    # TINGKAT 1: KARTU METRIK RINGKASAN FINANSIAL UMKM
-    # ==========================================
-    st.subheader("📊 Indikator Performa Keuangan Toko (Key Performance Indicators)")
-    
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Total Item Terproses", f"{len(df_clean)} Item", help="Jumlah baris data komoditas unik yang terekstraksi")
-    m2.metric("Median Harga Satuan", f"Rp {df_clean['harga_satuan'].median():,.0f}", help="Nilai tengah patokan harga produk di pasar")
-    m3.metric("Total Akumulasi Transaksi", f"Rp {laporan_struk_filtered['total_transaksi'].sum():,.0f}", help="Total omzet bersih dari struk belanja valid")
-    m4.metric("Estimasi Profit Usaha (Margin 20%)", f"Rp {laporan_struk_filtered['estimasi_laba'].sum():,.0f}", help="Proyeksi keuntungan kotor UMKM")
-
-    st.divider()
-
-    # ==========================================
-    # TINGKAT 2: VISUALISASI GRID GRAFIK PERILAKU PASAR
+    # TINGKAT 1: VISUALISASI GRID GRAFIK PERILAKU PASAR
     # ==========================================
     st.subheader("📈 Analisis Kecenderungan Pasar dan Audit Finansial")
     
@@ -463,7 +451,7 @@ elif menu == "BQ3: Laporan Transaksi":
     st.divider()
 
     # ==========================================
-    # TINGKAT 3: LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
+    # TINGKAT 2: LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
     # ==========================================
     with st.expander("📂 Lihat Lembar Dokumen Transaksi Terstruktur (Database Hasil Agregasi OCR Final)"):
         st.write("Daftar 10 baris teratas nota belanja hasil eliminasi pencilan (*outliers*) dan *residual noise text*:")
@@ -475,7 +463,7 @@ elif menu == "BQ3: Laporan Transaksi":
     st.divider()
 
     # ==========================================
-    # TINGKAT 4: INSIGHT RESMI BISNIS DARI NOTEBOOK
+    # TINGKAT 3: INSIGHT RESMI BISNIS DARI NOTEBOOK
     # ==========================================
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 3")
     st.markdown("""
@@ -489,7 +477,6 @@ elif menu == "BQ3: Laporan Transaksi":
 
     > **Catatan Teknis Penulisan:** Beberapa nama toko dan nilai total transaksi masih mengandung *noise* OCR residual. Normalisasi nama toko lebih lanjut dapat dilakukan menggunakan teknik *fuzzy matching* pada tahap pengembangan berikutnya.
     """)
-
 # Footer Global
 st.divider()
 st.caption("Copyright © 2026 | Proyek NOPI AI Analysis Dashboard")
