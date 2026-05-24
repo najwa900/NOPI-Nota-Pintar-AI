@@ -101,7 +101,7 @@ if menu == "Home":
     2. Mendemonstrasikan transparansi perhitungan laba.
     3. Menyajikan data transaksi yang terstruktur.
     """)
-    st.image("https://via.placeholder.com/800x200.png?text=Nota+Pintar+UMKM+Digital", use_column_width=True)
+    
 
 # --- 1. HALAMAN RINGKASAN & EDA ---
 elif menu == "Ringkasan & EDA":
