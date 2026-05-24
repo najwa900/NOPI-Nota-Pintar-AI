@@ -24,12 +24,22 @@ def kategorikan_harga(h):
     elif h <= 100000: return 'Mahal (50-100rb)'
     else: return 'Sangat Mahal (>100rb)'
 
-# --- LOAD DATA ---
+# --- LOAD DATA (REVISI SUPAYA SAMA 100% DENGAN COLAB) ---
 @st.cache_data
 def load_data():
+    # Pastikan file 'dataset_ocr_clear_final.csv' diletakkan di dalam folder data/
+    # File ini adalah hasil export .to_csv() terakhir dari Google Colab kamu
+    df_clean = pd.read_csv('data/dataset_ocr_clear_final.csv')
+    
+    # df_primer tetap dibaca jika dibutuhkan untuk menu lain
     df_primer = pd.read_csv('data/Dataset_Terstruktur_Primer_NOPI.csv')
     df_evaluasi = pd.read_csv('data/evaluasi_3_model.csv')
     df_detail = pd.read_csv('data/detail_akurasi_semua_model.csv')
+    
+    # PENTING: Jangan lakukan filter manual lagi seperti dropna atau >= 500 jika 
+    # dataset_ocr_clear_final sudah dalam kondisi matang/bersih dari Colab.
+    
+    return df_primer, df_evaluasi, df_detail, df_clean
     
     # Pre-cleaning sederhana untuk dashboard
     df_clean = df_primer.dropna(subset=['nama_barang', 'harga_satuan']).copy()
