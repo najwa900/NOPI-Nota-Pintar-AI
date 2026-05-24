@@ -82,7 +82,6 @@ menu = st.sidebar.selectbox(
     [
         "Home", 
         "Ringkasan & EDA", 
-        "Analisis Resolusi (OCR)", 
         "BQ1: Performa OCR", 
         "BQ2: Estimasi Laba", 
         "BQ3: Laporan Transaksi"
