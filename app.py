@@ -83,7 +83,6 @@ menu = st.sidebar.selectbox(
         "Home", 
         "Ringkasan & EDA", 
         "Analisis Resolusi (OCR)", 
-        "Performa Model AI", 
         "BQ1: Performa OCR", 
         "BQ2: Estimasi Laba", 
         "BQ3: Laporan Transaksi"
@@ -235,49 +234,6 @@ elif menu == "Analisis Resolusi (OCR)":
         "(hingga angka 5.0). Hal ini menandakan adanya gambar yang sangat memanjang atau tidak proporsional."
     )
 
-# --- 3. HALAMAN PERFORMA MODEL AI ---
-elif menu == "Performa Model AI":
-    st.title("🎯 Evaluasi Model Klasifikasi")
-
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Accuracy", "99%")
-    c2.metric("Precision", "100%")
-    c3.metric("Recall", "99%")
-
-    st.write("### Confusion Matrix")
-
-    # --- LABEL ASLI (SAMAKAN DENGAN COLAB) ---
-    y_true = df_all['label'].map({'struk': 1, 'non_struk': 0})
-
-    # --- SIMULASI PREDIKSI (SAMAKAN LOGIC COLAB) ---
-    y_pred = y_true.copy()
-
-    np.random.seed(42)
-    noise_idx = np.random.choice(y_true.index, size=5, replace=False)
-    y_pred.loc[noise_idx] = 1 - y_pred.loc[noise_idx]
-
-    cm = confusion_matrix(y_true, y_pred)
-
-    fig6, ax6 = plt.subplots(figsize=(6, 4))
-
-    disp = ConfusionMatrixDisplay(
-        confusion_matrix=cm,
-        display_labels=['Non-Struk', 'Struk']
-    )
-
-    disp.plot(cmap='Blues', ax=ax6)
-
-    st.pyplot(fig6)
-
-    st.success(
-        "Performa Klasifikasi Struk\n\n"
-        "Akurasi Sangat Tinggi: Model berhasil memprediksi dengan benar sebanyak 2.112 data "
-        "(1.002 Non-Struk + 1.110 Struk), dari total 2.117 data, yang menunjukkan tingkat akurasi "
-        "mencapai ~99,7%.\n\n"
-        "Zero False Positives (Keamanan Sistem): Tidak ada data \"Non-Struk\" yang salah terdeteksi "
-        "sebagai \"Struk\" (angka 0 pada pojok kanan atas). Hal ini sangat krusial bagi bisnis karena "
-        "sistem dipastikan tidak akan memproses gambar sampah/acak sebagai dokumen transaksi keuangan."
-    )
 
 # --- BQ1: PERFORMA OCR ---
 elif menu == "BQ1: Performa OCR":
