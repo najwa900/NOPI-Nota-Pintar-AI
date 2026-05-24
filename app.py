@@ -530,4 +530,4 @@ elif menu == "BQ3: Laporan Transaksi":
 
 # Footer Global
 st.divider()
-st.caption("Copyright © 2024 | Proyek NOPI AI Analysis Dashboard")
+st.caption("Copyright © 2026 | Proyek NOPI AI Analysis Dashboard")
