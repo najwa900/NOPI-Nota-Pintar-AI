@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from PIL import Image
+import os
 
 # ==========================================
 # 0. KONFIGURASI HALAMAN & TEMA
@@ -14,17 +15,26 @@ st.set_page_config(
 )
 
 # ==========================================
-# 1. LOAD DATASET ASLI (data/raw/)
+# 1. LOAD DATASET ASLI (Jalur: data/)
 # ==========================================
 @st.cache_data
 def load_nopi_data():
-    # Membaca file sesuai folder yang kamu miliki
-    df_primer = pd.read_csv('data/raw/Dataset_Terstruktur_Primer_NOPI.csv')
-    df_eval = pd.read_csv('data/raw/evaluasi_3_model.csv')
-    df_detail = pd.read_csv('data/raw/detail_akurasi_semua_model.csv')
-    df_komparasi = pd.read_csv('data/raw/hasil_komparasi_ocr_final.csv')
+    # Mendapatkan jalur dasar tempat file app.py berada
+    base_path = os.path.dirname(__file__)
     
-    # Pengondisian kolom tanggal jika ada (sesuaikan dengan nama kolom aslimu)
+    # Menggabungkan path secara aman langsung menunjuk ke folder 'data'
+    file_primer = os.path.join(base_path, 'data', 'Dataset_Terstruktur_Primer_NOPI.csv')
+    file_eval = os.path.join(base_path, 'data', 'evaluasi_3_model.csv')
+    file_detail = os.path.join(base_path, 'data', 'detail_akurasi_semua_model.csv')
+    file_komparasi = os.path.join(base_path, 'data', 'hasil_komparasi_ocr_final.csv')
+    
+    # Membaca file CSV asli
+    df_primer = pd.read_csv(file_primer)
+    df_eval = pd.read_csv(file_eval)
+    df_detail = pd.read_csv(file_detail)
+    df_komparasi = pd.read_csv(file_komparasi)
+    
+    # Pengondisian kolom tanggal jika ada
     for col in df_primer.columns:
         if 'tanggal' in col.lower() or 'date' in col.lower():
             df_primer[col] = pd.to_datetime(df_primer[col], errors='coerce')
@@ -32,7 +42,7 @@ def load_nopi_data():
             
     return df_primer, df_eval, df_detail, df_komparasi
 
-# Memuat data
+# Memuat data secara aman
 try:
     df_primer, df_eval, df_detail, df_komparasi = load_nopi_data()
     data_loaded = True
@@ -74,7 +84,7 @@ st.markdown("Integrasi Arsitektur CNN (Gambar) & PaddleOCR (Teks) untuk Otomasi 
 st.markdown("---")
 
 if not data_loaded:
-    st.error(f"Gagal memuat file dari `data/raw/`. Pastikan struktur folder di GitHub sudah benar. Error: {error_msg}")
+    st.error(f"Gagal memuat file dari folder `data/`. Pastikan penulisan file di GitHub sudah benar. Error: {error_msg}")
     st.stop()
 
 # ------------------------------------------
@@ -121,9 +131,9 @@ elif page == "Performa Model AI":
         st.subheader("Hasil Evaluasi Komparasi Model")
         st.write("Visualisasi berdasarkan data performa riil pada file `evaluasi_3_model.csv` dan `hasil_komparasi_ocr_final.csv`:")
         
-        # Cek kolom file evaluasi_3_model.csv kamu secara dinamis
-        x_col = df_eval.columns[0] # Biasanya 'Nama Model' atau sejenisnya
-        y_col = df_eval.columns[1] # Biasanya 'Success Rate' atau 'Akurasi'
+        # Cek kolom file evaluasi_3_model.csv secara dinamis
+        x_col = df_eval.columns[0]
+        y_col = df_eval.columns[1]
         
         fig_ev = px.bar(df_eval, x=x_col, y=y_col, color=x_col, 
                         title="Tingkat Akurasi/Keberhasilan antar Arsitektur OCR")
@@ -137,7 +147,6 @@ elif page == "Performa Model AI":
         pesan_tes = st.text_input("Simulasi teks masuk (contoh: 'mau pengulangan ujian karena nilai jelek'):")
         
         if pesan_tes:
-            # Simulasi deteksi berbasis aturan kata kunci cerdas (pengganti pickle pkl)
             pesan_lower = pesan_tes.lower()
             if "ujian" in pesan_lower or "remedial" in pesan_lower:
                 hasil_pred = "Pengulangan Ujian"
@@ -191,7 +200,6 @@ elif page == "Insight Data Transaksi":
         
     elif "3." in pertanyaan:
         st.markdown("**Jawaban Analisis:** Proyeksi margin keuntungan kotor rata-rata sebesar 15% dari total penjualan per produk.")
-        # Membuat kolom kalkulasi laba tiruan berbasis data primer asli kamu
         if np.issubdtype(df_filtered[col_harga].dtype, np.number):
             df_filtered['Estimasi_Laba'] = df_filtered[col_harga] * 0.15
             fig3 = px.bar(df_filtered.head(15), x=col_barang, y='Estimasi_Laba', title="Estimasi Margin Keuntungan per Produk (Top 15)")
