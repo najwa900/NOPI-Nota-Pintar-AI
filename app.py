@@ -170,22 +170,21 @@ elif menu == "BQ1: Performa OCR":
 
 
 # --- BQ2: ESTIMASI LABA ---
-# --- BQ2: ESTIMASI LABA ---
 elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
     st.markdown("Sistem menghitung perkiraan laba secara otomatis berdasarkan total pengeluaran item struk belanja dan persentase margin keuntungan standar.")
     
-    # Margin dikunci pada 20% sesuai dengan standar pengujian di notebook
+    # Kunci margin di angka 20% sesuai notebook asli kamu
     margin_tetap = 20
     
-    # Hitung Laba secara otomatis (Persis sesuai urutan Colab)
-    df_laba = df_clean[['nama_barang', 'jumlah_barang', 'harga_satuan', 'total_harga_item']].copy()
+    # Ambil murni dari data primer tanpa drop duplikat atau groupby, persis seperti cell Colab kamu
+    df_laba = df_primer.copy()
     df_laba['laba_total'] = df_laba['total_harga_item'] * (margin_tetap / 100)
     
-    # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart sesuai Notebook)
+    # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart sesuai Gambar Colab)
     st.subheader("📊 Top 15 Komoditas Berdasarkan Estimasi Laba (Margin 20%)")
     
-    # Urutan filter dan sorting disamakan persis dengan notebook Colab kamu
+    # Filter dan sorting murni berbasis baris transaksi individual (tanpa akumulasi nama barang)
     df_plot = (
         df_laba[df_laba['laba_total'] > 0]
         .sort_values('laba_total')
@@ -195,23 +194,24 @@ elif menu == "BQ2: Estimasi Laba":
     if not df_plot.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
         
-        # PENTING: Mengonversi nama_barang menjadi string murni langsung di dalam fungsi plot.
-        # Ini memastikan data yang diambil tetap Top 15 versi Colab, tapi terbebas dari TypeError Matplotlib di Streamlit.
+        # Sumbu Y dibuat unik dengan menggabungkan indeks aslinya agar item duplikat dari Colab tidak nge-bug di Matplotlib Streamlit
+        y_labels = [f"{row['nama_barang']} (Index {idx})" for idx, row in df_plot.iterrows()]
+        
         bars = ax.barh(
-            [str(x).strip() for x in df_plot['nama_barang']], 
+            y_labels, 
             df_plot['laba_total'].tolist(),
             color='mediumseagreen',
             alpha=0.85,
             edgecolor='white'
         )
         
-        # Atribut visualisasi grafis disamakan 100% dengan Colab
+        # Label format nominal rupiah
         ax.bar_label(bars, fmt='Rp %.0f', padding=3, fontsize=9)
         ax.set_title('BQ2 — Estimasi Laba per Item (Margin 20%)', fontweight='bold')
         ax.set_xlabel('Estimasi Laba Total (Rp)')
         
         plt.tight_layout()
-        st.pyplot(fig) # Render langsung ke kanvas web Streamlit
+        st.pyplot(fig) # Tampilkan ke halaman Streamlit
     else:
         st.warning("Tidak ada data produk dengan estimasi laba di atas Rp 0 untuk ditampilkan pada grafik.")
 
