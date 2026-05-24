@@ -25,9 +25,9 @@ def kategorikan_harga(h):
 # --- LOAD DATA ---
 @st.cache_data
 def load_data():
-    df_primer = pd.read_csv('Dataset_Terstruktur_Primer_NOPI.csv')
-    df_evaluasi = pd.read_csv('evaluasi_3_model.csv')
-    df_detail = pd.read_csv('detail_akurasi_semua_model.csv')
+    df_primer = pd.read_csv('data/Dataset_Terstruktur_Primer_NOPI.csv')
+    df_evaluasi = pd.read_csv('data/evaluasi_3_model.csv')
+    df_detail = pd.read_csv('data/detail_akurasi_semua_model.csv')
     
     # Pre-cleaning sederhana untuk dashboard
     df_clean = df_primer.dropna(subset=['nama_barang', 'harga_satuan']).copy()
