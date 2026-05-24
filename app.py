@@ -174,19 +174,22 @@ elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
     st.markdown("Sistem menghitung perkiraan laba secara otomatis berdasarkan total pengeluaran item struk belanja dan persentase margin keuntungan standar.")
     
-    # Kunci margin di angka 20% sesuai notebook asli kamu
+    # 1. REPLIKASI LOGIKA DEMO COLAB (Mengunci Data Hanya pada Struk primer_0079.jpg)
+    sample_file = 'primer_0079.jpg'
+    
+    # Ambil data murni dari df_primer agar urutan indeksnya asli seperti di Colab
+    sample_struk = df_primer[df_primer['filename'] == sample_file].copy()
+    
+    # Margin dikunci pada 20% (persen_margin=0.20) sesuai demo ujian di notebook
     margin_tetap = 20
+    sample_struk['laba_total'] = sample_struk['total_harga_item'] * (margin_tetap / 100)
     
-    # Ambil murni dari data primer tanpa drop duplikat atau groupby, persis seperti cell Colab kamu
-    df_laba = df_primer.copy()
-    df_laba['laba_total'] = df_laba['total_harga_item'] * (margin_tetap / 100)
+    # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart)
+    st.subheader(f"📊 Top 15 Komoditas Berdasarkan Estimasi Laba (Demo Struk: {sample_file})")
     
-    # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart sesuai Gambar Colab)
-    st.subheader("📊 Top 15 Komoditas Berdasarkan Estimasi Laba (Margin 20%)")
-    
-    # Filter dan sorting murni berbasis baris transaksi individual (tanpa akumulasi nama barang)
+    # Logika filter, pengurutan, dan tail(15) disamakan 100% dengan notebook
     df_plot = (
-        df_laba[df_laba['laba_total'] > 0]
+        sample_struk[sample_struk['laba_total'] > 0]
         .sort_values('laba_total')
         .tail(15)
     ).copy()
@@ -194,26 +197,24 @@ elif menu == "BQ2: Estimasi Laba":
     if not df_plot.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
         
-        # Sumbu Y dibuat unik dengan menggabungkan indeks aslinya agar item duplikat dari Colab tidak nge-bug di Matplotlib Streamlit
-        y_labels = [f"{row['nama_barang']} (Index {idx})" for idx, row in df_plot.iterrows()]
-        
+        # Casting string secara inline untuk mencegah TypeError pada matplotlib Streamlit web
         bars = ax.barh(
-            y_labels, 
+            [str(x) for x in df_plot['nama_barang']], 
             df_plot['laba_total'].tolist(),
             color='mediumseagreen',
             alpha=0.85,
             edgecolor='white'
         )
         
-        # Label format nominal rupiah
+        # Atribut visualisasi grafis disamakan 100% dengan Colab
         ax.bar_label(bars, fmt='Rp %.0f', padding=3, fontsize=9)
         ax.set_title('BQ2 — Estimasi Laba per Item (Margin 20%)', fontweight='bold')
         ax.set_xlabel('Estimasi Laba Total (Rp)')
         
         plt.tight_layout()
-        st.pyplot(fig) # Tampilkan ke halaman Streamlit
+        st.pyplot(fig) # Render langsung ke kanvas web Streamlit
     else:
-        st.warning("Tidak ada data produk dengan estimasi laba di atas Rp 0 untuk ditampilkan pada grafik.")
+        st.warning(f"Tidak ada data transaksi valid pada file {sample_file} untuk ditampilkan.")
 
     st.divider()
 
