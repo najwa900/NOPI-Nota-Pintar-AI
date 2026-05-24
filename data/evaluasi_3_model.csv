@@ -1,0 +1,4 @@
+Nama Model,Rata-rata Waktu (Detik),Success Rate (%),Akurasi Jumlah Item (%),Akurasi Total Harga (%)
+Paddle,5.26,73.33,27.3,26.09
+Tesseract,2.64,60.0,13.67,16.05
+EasyOCR,18.73,56.67,33.47,14.03
