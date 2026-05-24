@@ -257,13 +257,31 @@ elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
     st.markdown("Sistem menghitung perkiraan laba berdasarkan total pengeluaran item struk belanja dan persentase margin keuntungan standar.")
     
+    # 1. REPLIKASI LOGIKA DEMO COLAB (Mengunci Data Hanya pada Struk primer_0079.jpg)
     sample_file = 'primer_0079.jpg'
+    
+    # Ambil data murni dari df_primer agar urutan indeksnya asli seperti di Colab
     sample_struk = df_primer[df_primer['filename'] == sample_file].copy()
     
+    # Margin dikunci pada 20% (persen_margin=0.20) sesuai standar pengujian di notebook
     margin_tetap = 20
     sample_struk['laba_total'] = sample_struk['total_harga_item'] * (margin_tetap / 100)
     
-    st.subheader(f"📊 Top 15 Komoditas Berdasarkan Estimasi Laba (Demo Struk: {sample_file})")
+    st.subheader(f"📊 Demo Hasil Perhitungan Laba (Struk: {sample_file}, Margin: {margin_tetap}%)")
+    
+    # TAMPILKAN TABEL DEMO STRUK (Replikasi fungsi display(df_laba) dari Colab)
+    # Menampilkan kolom informasi esensial yang mencerminkan hasil fungsi kalkulasi laba
+    kolom_laba = ['nama_toko', 'tanggal', 'nama_barang', 'jumlah_barang', 'harga_satuan', 'total_harga_item', 'laba_total']
+    # Memastikan kolom tersedia sebelum ditampilkan untuk mencegah KeyError akibat perbedaan pre-cleaning
+    kolom_tersedia = [col for col in kolom_laba if col in sample_struk.columns]
+    
+    st.write("Tabel representasi data terstruktur transaksional item pada demo struk:")
+    st.dataframe(sample_struk[kolom_tersedia], use_container_width=True)
+    
+    st.divider()
+    
+    # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart)
+    st.write("### Visualisasi Top 15 Komoditas Berdasarkan Estimasi Laba")
     
     df_plot = (
         sample_struk[sample_struk['laba_total'] > 0]
@@ -274,6 +292,7 @@ elif menu == "BQ2: Estimasi Laba":
     if not df_plot.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
         
+        # Casting string secara inline untuk mencegah TypeError pada matplotlib Streamlit web
         bars = ax.barh(
             [str(x) for x in df_plot['nama_barang']], 
             df_plot['laba_total'].tolist(),
@@ -287,12 +306,13 @@ elif menu == "BQ2: Estimasi Laba":
         ax.set_xlabel('Estimasi Laba Total (Rp)')
         
         plt.tight_layout()
-        st.pyplot(fig)
+        st.pyplot(fig) # Render langsung ke kanvas web Streamlit
     else:
-        st.warning(f"Tidak ada data transaksi valid pada file {sample_file} untuk ditampilkan.")
+        st.warning(f"Tidak ada data transaksi valid pada file {sample_file} dengan keuntungan di atas Rp 0 untuk ditampilkan.")
 
     st.divider()
 
+    # --- INSIGHT RESMI BISNIS DARI NOTEBOOK ---
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 2")
     st.markdown("""
     Dengan input persentase margin dari pengguna, sistem dapat langsung menghitung estimasi laba per item tanpa perlu memasukkan harga beli satu per satu. Berdasarkan demo struk `primer_0079.jpg` dengan margin 20%, total omzet struk sebesar **Rp 67.100** menghasilkan estimasi laba **Rp 13.420**.
@@ -301,9 +321,6 @@ elif menu == "BQ2: Estimasi Laba":
 
     Pendekatan ini praktis untuk pelaku UMKM yang tidak memiliki sistem pencatatan harga beli terstruktur — cukup input satu angka margin, sistem langsung menghasilkan laporan laba per item yang siap digunakan untuk pembukuan sederhana.
     """)
-
-
-# --- BQ3: LAPORAN TRANSAKSI ---
 # --- BQ3: LAPORAN TRANSAKSI ---
 elif menu == "BQ3: Laporan Transaksi":
     st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur untuk mendukung pengambilan keputusan bisnis?")
