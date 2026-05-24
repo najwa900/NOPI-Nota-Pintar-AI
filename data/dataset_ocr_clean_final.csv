@@ -1,0 +1,193 @@
+filename,sumber,nama_toko,tanggal_clean,tanggal_valid,nama_barang,jumlah_barang,harga_satuan,total_harga_item,kategori_harga,bulan,tahun,bulan_tahun,estimasi_laba_20
+primer_0003.jpg,primer,Central Park,,False,Popmierbaso57G,1.0,1200.0,1200.0,Sangat Murah (<=5rb),,,NaT,240.0
+primer_0005.jpg,primer,Titik Mula Coffee,2025-05-06,True,Steak-Brown Sauce,1.0,35000.0,35000.0,Sedang (20-50rb),5.0,2025.0,2025-05,7000.0
+primer_0005.jpg,primer,Titik Mula Coffee,2025-05-06,True,Sauce,1.0,35000.0,35000.0,Sedang (20-50rb),5.0,2025.0,2025-05,7000.0
+primer_0007.jpg,primer,Beepos,2023-05-24,True,Bakso,2.0,12000.0,24000.0,Murah (5-20rb),5.0,2023.0,2023-05,4800.0
+primer_0007.jpg,primer,Beepos,2023-05-24,True,Cah Kangkung,3.0,7500.0,22500.0,Murah (5-20rb),5.0,2023.0,2023-05,4500.0
+primer_0007.jpg,primer,Beepos,2023-05-24,True,Capjay,3.0,17000.0,51000.0,Murah (5-20rb),5.0,2023.0,2023-05,10200.0
+primer_0007.jpg,primer,Beepos,2023-05-24,True,Cumi Goreng Tepung Gurih,3.0,25000.0,75000.0,Sedang (20-50rb),5.0,2023.0,2023-05,15000.0
+primer_0009.jpg,primer,Cafesolooasis,,False,1 7237689F 7237690,3.0,43755.0,131265.0,Sedang (20-50rb),,,NaT,26253.0
+primer_0009.jpg,primer,Cafesolooasis,,False,Moca Capucinolarge,1.0,25800.0,25800.0,Sedang (20-50rb),,,NaT,5160.0
+primer_0009.jpg,primer,Cafesolooasis,,False,Icetea,3.0,56225.0,168675.0,Mahal (50-100rb),,,NaT,33735.0
+primer_0009.jpg,primer,Cafesolooasis,,False,Chess Burgersalmon 168 675,1.0,23500.0,23500.0,Sedang (20-50rb),,,NaT,4700.0
+primer_0011.jpg,primer,Satetongseng,2018-01-11,True,Sate Kambing,1.0,45000.0,45000.0,Sedang (20-50rb),1.0,2018.0,2018-01,9000.0
+primer_0011.jpg,primer,Satetongseng,2018-01-11,True,Sate Lembu,5.0,30000.0,150000.0,Sedang (20-50rb),1.0,2018.0,2018-01,30000.0
+primer_0011.jpg,primer,Satetongseng,2018-01-11,True,Tongseng Kambin,5.0,5000.0,25000.0,Sangat Murah (<=5rb),1.0,2018.0,2018-01,5000.0
+primer_0011.jpg,primer,Satetongseng,2018-01-11,True,Nasi,5.0,12000.0,60000.0,Murah (5-20rb),1.0,2018.0,2018-01,12000.0
+primer_0011.jpg,primer,Satetongseng,2018-01-11,True,Aneka Jus,4.0,3000.0,12000.0,Sangat Murah (<=5rb),1.0,2018.0,2018-01,2400.0
+primer_0020.jpg,primer,Toko Selada,,False,Tinta Epson,1.0,80000.0,80000.0,Mahal (50-100rb),,,NaT,16000.0
+primer_0020.jpg,primer,Toko Selada,,False,Dngkar Jakarta,1.0,9000.0,9000.0,Murah (5-20rb),,,NaT,1800.0
+primer_0022.jpg,primer,Apaaja Yangaku Dapetdi,2024-07-21,True,Alfamartdenganuang10K,1.0,9300.0,9300.0,Murah (5-20rb),7.0,2024.0,2024-07,1860.0
+primer_0022.jpg,primer,Apaaja Yangaku Dapetdi,2024-07-21,True,Cimory Bnn240Ml,2.0,2800.0,5600.0,Sangat Murah (<=5rb),7.0,2024.0,2024-07,1120.0
+primer_0022.jpg,primer,Apaaja Yangaku Dapetdi,2024-07-21,True,Mieoven Iga 78G,1.0,2800.0,2800.0,Sangat Murah (<=5rb),7.0,2024.0,2024-07,560.0
+primer_0025.jpg,primer,Cv.Barokah Mulia Sejati,,False,Kaget.Bangetbpas Masnya,1.0,6500.0,6500.0,Murah (5-20rb),,,NaT,1300.0
+primer_0025.jpg,primer,Cv.Barokah Mulia Sejati,,False,Ff Pf Str 225Ml,1.0,10500.0,10500.0,Murah (5-20rb),,,NaT,2100.0
+primer_0025.jpg,primer,Cv.Barokah Mulia Sejati,,False,Paroti B Ckt65G,1.0,4900.0,4900.0,Sangat Murah (<=5rb),,,NaT,980.0
+primer_0025.jpg,primer,Cv.Barokah Mulia Sejati,,False,Sb Myk Bwg 61G,1.0,3600.0,3600.0,Sangat Murah (<=5rb),,,NaT,720.0
+primer_0026.jpg,primer,Duplikat,2022-10-22,True,Kpbrdl 0.020,1.0,500.0,500.0,Sangat Murah (<=5rb),10.0,2022.0,2022-10,100.0
+primer_0026.jpg,primer,Duplikat,2022-10-22,True,Wls Pl Str90Ml,1.0,5000.0,5000.0,Sangat Murah (<=5rb),10.0,2022.0,2022-10,1000.0
+primer_0026.jpg,primer,Duplikat,2022-10-22,True,Sasa Snt 200Ml,1.0,10000.0,10000.0,Murah (5-20rb),10.0,2022.0,2022-10,2000.0
+primer_0026.jpg,primer,Duplikat,2022-10-22,True,Md Egg Drop110G,1.0,9100.0,9100.0,Murah (5-20rb),10.0,2022.0,2022-10,1820.0
+primer_0029.jpg,primer,Kota Legenda,,False,Promina Sm Ay8Sy1,1.0,14290.0,14290.0,Murah (5-20rb),,,NaT,2858.0
+primer_0029.jpg,primer,Kota Legenda,,False,Promina Bb6 C/Mus,1.0,15290.0,15290.0,Murah (5-20rb),,,NaT,3058.0
+primer_0029.jpg,primer,Kota Legenda,,False,Yeos Grass Jely/D,1.0,6490.0,6490.0,Murah (5-20rb),,,NaT,1298.0
+primer_0029.jpg,primer,Kota Legenda,,False,Monde Boromon6X20,1.0,14290.0,14290.0,Murah (5-20rb),,,NaT,2858.0
+primer_0029.jpg,primer,Kota Legenda,,False,Betadine H/W Heav,1.0,26900.0,26900.0,Sedang (20-50rb),,,NaT,5380.0
+primer_0029.jpg,primer,Kota Legenda,,False,Pepsodent Pasta/G,1.0,10990.0,10990.0,Murah (5-20rb),,,NaT,2198.0
+primer_0029.jpg,primer,Kota Legenda,,False,Kinder Joy F/Boys,1.0,12490.0,12490.0,Murah (5-20rb),,,NaT,2498.0
+primer_0029.jpg,primer,Kota Legenda,,False,Kinder Joy F/Girl,1.0,12490.0,12490.0,Murah (5-20rb),,,NaT,2498.0
+primer_0029.jpg,primer,Kota Legenda,,False,Bango Kecap Manis,1.0,16990.0,16990.0,Murah (5-20rb),,,NaT,3398.0
+primer_0029.jpg,primer,Kota Legenda,,False,Yeos Grass Jely/D,1.0,6490.0,6490.0,Murah (5-20rb),,,NaT,1298.0
+primer_0029.jpg,primer,Kota Legenda,,False,Engel M/Potatom,1.0,11990.0,11990.0,Murah (5-20rb),,,NaT,2398.0
+primer_0029.jpg,primer,Kota Legenda,,False,M/Suka Sup Ayam55,1.0,7790.0,7790.0,Murah (5-20rb),,,NaT,1558.0
+primer_0029.jpg,primer,Kota Legenda,,False,La Fonte Maca Ay4,2.0,5090.0,10180.0,Murah (5-20rb),,,NaT,2036.0
+primer_0029.jpg,primer,Kota Legenda,,False,M/Suka Sup Ayam55,1.0,7790.0,7790.0,Murah (5-20rb),,,NaT,1558.0
+primer_0029.jpg,primer,Kota Legenda,,False,Pronas Cls C/B Ch,1.0,5990.0,5990.0,Murah (5-20rb),,,NaT,1198.0
+primer_0029.jpg,primer,Kota Legenda,,False,Milo Rtd115,1.0,20990.0,20990.0,Sedang (20-50rb),,,NaT,4198.0
+primer_0029.jpg,primer,Kota Legenda,,False,Gillet Foamy Lm,1.0,67990.0,67990.0,Mahal (50-100rb),,,NaT,13598.0
+primer_0029.jpg,primer,Kota Legenda,,False,Hi Lo Gold Ch0500,1.0,29990.0,29990.0,Sedang (20-50rb),,,NaT,5998.0
+primer_0029.jpg,primer,Kota Legenda,,False,Lux B/W Soft Rose,1.0,27890.0,27890.0,Sedang (20-50rb),,,NaT,5578.0
+primer_0029.jpg,primer,Kota Legenda,,False,Plastic Shop.Bag2,1.0,352855.4000000004,451190.0,Sangat Mahal (>100rb),,,NaT,90238.0
+primer_0030.jpg,primer,Mamy Poko Opnstd,2015-05-24,True,Sokl In Liq Pink B,1.0,19500.0,19500.0,Murah (5-20rb),5.0,2015.0,2015-05,3900.0
+primer_0038.jpg,primer,Shop,2022-04-14,True,Nasi Ayam Geprek,1.0,12000.0,12000.0,Murah (5-20rb),4.0,2022.0,2022-04,2400.0
+primer_0038.jpg,primer,Shop,2022-04-14,True,Nasi Ayam Kremes,1.0,15000.0,15000.0,Murah (5-20rb),4.0,2022.0,2022-04,3000.0
+primer_0038.jpg,primer,Shop,2022-04-14,True,Nasi Goreng Spesial,1.0,20000.0,20000.0,Murah (5-20rb),4.0,2022.0,2022-04,4000.0
+primer_0040.jpg,primer,At Depck Distibusiodo Rayg,2025-01-31,True,Lala Anggur Cup 15L,1.0,19500.0,19500.0,Murah (5-20rb),1.0,2025.0,2025-01,3900.0
+primer_0040.jpg,primer,At Depck Distibusiodo Rayg,2025-01-31,True,Dlala Japbu Cup 350,24.0,19500.0,468000.0,Murah (5-20rb),1.0,2025.0,2025-01,93600.0
+primer_0040.jpg,primer,At Depck Distibusiodo Rayg,2025-01-31,True,Sukses Hie Gorens Atam Krenes Uae 133R,10.0,343130.0,3431300.0,Sangat Mahal (>100rb),1.0,2025.0,2025-01,686260.0
+primer_0040.jpg,primer,At Depck Distibusiodo Rayg,2025-01-31,True,Golda Dglce Latte Rtl 200Hl,1.0,34020.0,34020.0,Sedang (20-50rb),1.0,2025.0,2025-01,6804.0
+primer_0042.jpg,primer,Ft.Deeok Distrabusiado Raya,2015-10-20,True,12Cs,1.0,32400.0,32400.0,Sedang (20-50rb),10.0,2015.0,2015-10,6480.0
+primer_0042.jpg,primer,Ft.Deeok Distrabusiado Raya,2015-10-20,True,Hilkugnal 200Isi12,1.0,32400.0,32400.0,Sedang (20-50rb),10.0,2015.0,2015-10,6480.0
+primer_0046.jpg,primer,Cana,,False,Ncrico,1.0,13000.0,13000.0,Murah (5-20rb),,,NaT,2600.0
+primer_0047.jpg,primer,Trre,2022-11-10,True,Eppermint Mocha,1.0,34000.0,34000.0,Sedang (20-50rb),11.0,2022.0,2022-11,6800.0
+primer_0047.jpg,primer,Trre,2022-11-10,True,With Skimmed Milk,1.0,4000.0,4000.0,Sangat Murah (<=5rb),11.0,2022.0,2022-11,800.0
+primer_0047.jpg,primer,Trre,2022-11-10,True,Iced Mocha,1.0,34000.0,34000.0,Sedang (20-50rb),11.0,2022.0,2022-11,6800.0
+primer_0047.jpg,primer,Trre,2022-11-10,True,Es Kopi Susu Tetangga,1.0,20000.0,20000.0,Murah (5-20rb),11.0,2022.0,2022-11,4000.0
+primer_0047.jpg,primer,Trre,2022-11-10,True,Iced Caramel Macchiatto,1.0,34000.0,34000.0,Sedang (20-50rb),11.0,2022.0,2022-11,6800.0
+primer_0047.jpg,primer,Trre,2022-11-10,True,Donat Cokelat,1.0,8000.0,8000.0,Murah (5-20rb),11.0,2022.0,2022-11,1600.0
+primer_0051.jpg,primer,Tokosukatant,2026-03-31,True,Sambal Uleg,1.0,12000.0,12000.0,Murah (5-20rb),3.0,2026.0,2026-03,2400.0
+primer_0051.jpg,primer,Tokosukatant,2026-03-31,True,Gula Merah,2.0,16000.0,32000.0,Murah (5-20rb),3.0,2026.0,2026-03,6400.0
+primer_0051.jpg,primer,Tokosukatant,2026-03-31,True,Tepung Sasa,1.0,23000.0,23000.0,Sedang (20-50rb),3.0,2026.0,2026-03,4600.0
+primer_0051.jpg,primer,Tokosukatant,2026-03-31,True,Sukra/Katom 2000,1.0,17500.0,17500.0,Murah (5-20rb),3.0,2026.0,2026-03,3500.0
+primer_0052.jpg,primer,Penjualan (Asli),2026-02-04,True,10-D00,10.0,19000.0,190000.0,Murah (5-20rb),2.0,2026.0,2026-02,38000.0
+primer_0053.jpg,primer,Ft Depok Distribusiado Rsya,2015-10-20,True,Olala Anbu Cup 150L,24.0,19500.0,468000.0,Murah (5-20rb),10.0,2015.0,2015-10,93600.0
+primer_0053.jpg,primer,Ft Depok Distribusiado Rsya,2015-10-20,True,Kopi Tp Gula Aren 22G R15,75.0,1650.0,123750.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,24750.0
+primer_0053.jpg,primer,Ft Depok Distribusiado Rsya,2015-10-20,True,Sedaap Mie Sureng Bas 9Icr,10.0,274840.0,2748400.0,Sangat Mahal (>100rb),10.0,2015.0,2015-10,549680.0
+primer_0054.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Foddrto Kopi Nongkrung 15Ol.Isi24,5.0,19500.0,97500.0,Murah (5-20rb),10.0,2015.0,2015-10,19500.0
+primer_0055.jpg,primer,Pr Pepuk Distribusindo Raya,2025-10-09,True,Ipcs,1.0,775.0,775.0,Sangat Murah (<=5rb),10.0,2025.0,2025-10,155.0
+primer_0056.jpg,primer,2021-03-15,2021-03-15,True,Led 10Watt,1.0,25000.0,25000.0,Sedang (20-50rb),3.0,2021.0,2021-03,5000.0
+primer_0056.jpg,primer,2021-03-15,2021-03-15,True,Led 13Watt,1.0,30000.0,30000.0,Sedang (20-50rb),3.0,2021.0,2021-03,6000.0
+primer_0056.jpg,primer,2021-03-15,2021-03-15,True,Led 15 Watt,3.0,35000.0,105000.0,Sedang (20-50rb),3.0,2021.0,2021-03,21000.0
+primer_0056.jpg,primer,2021-03-15,2021-03-15,True,Led 16 Watt,2.0,35000.0,70000.0,Sedang (20-50rb),3.0,2021.0,2021-03,14000.0
+primer_0056.jpg,primer,2021-03-15,2021-03-15,True,Led 9Watt,1.0,20000.0,20000.0,Murah (5-20rb),3.0,2021.0,2021-03,4000.0
+primer_0058.jpg,primer,2153230772,2015-10-20,True,Ekunumi Crean Det Lemonsoo Rag 14Sgr,10.0,72000.0,720000.0,Mahal (50-100rb),10.0,2015.0,2015-10,144000.0
+primer_0058.jpg,primer,2153230772,2015-10-20,True,Daia Uhder Det Rotic Pikk Bas 2456,1.0,25200.0,25200.0,Sedang (20-50rb),10.0,2015.0,2015-10,5040.0
+primer_0058.jpg,primer,2153230772,2015-10-20,True,Upcs,1.0,60870.0,60870.0,Mahal (50-100rb),10.0,2015.0,2015-10,12174.0
+primer_0060.jpg,primer,Depok Distribusindo Baya,2025-01-16,True,Erdnome Crean Detviuletsoo Dag 145Cr,10.0,15000.0,150000.0,Murah (5-20rb),1.0,2025.0,2025-01,30000.0
+primer_0060.jpg,primer,Depok Distribusindo Baya,2025-01-16,True,Kopi Tophkachn022615Rff,15.0,23250.0,348750.0,Sedang (20-50rb),1.0,2025.0,2025-01,69750.0
+primer_0060.jpg,primer,Depok Distribusindo Baya,2025-01-16,True,Soklin Lir Det Perfume Uhbi Sc 4Oml Rt,35.0,23250.0,813750.0,Sedang (20-50rb),1.0,2025.0,2025-01,162750.0
+primer_0060.jpg,primer,Depok Distribusindo Baya,2025-01-16,True,Soklih Lir Bet Vtoletjundi Sct Aomlr,5.0,23250.0,116250.0,Sedang (20-50rb),1.0,2025.0,2025-01,23250.0
+primer_0060.jpg,primer,Depok Distribusindo Baya,2025-01-16,True,Soklik Liquts Det Sakura Uncosct Aoah,35.0,274843.0,9619505.0,Sangat Mahal (>100rb),1.0,2025.0,2025-01,1923901.0
+primer_0060.jpg,primer,Depok Distribusindo Baya,2025-01-16,True,Sukses Hie Gukens Ryan Kreres Dag13Gr,6.0,4200.0,25200.0,Sangat Murah (<=5rb),1.0,2025.0,2025-01,5040.0
+primer_0061.jpg,primer,Nota Penjualan (Asli),2025-12-01,True,Aq.600Ml 1X24,3.0,47000.0,141000.0,Sedang (20-50rb),12.0,2025.0,2025-12,28200.0
+primer_0062.jpg,primer,()1),2026-04-01,True,Promag,1.0,26000.0,26000.0,Sedang (20-50rb),4.0,2026.0,2026-04,5200.0
+primer_0062.jpg,primer,()1),2026-04-01,True,Chocolatos Dr Ink,1.0,20000.0,20000.0,Murah (5-20rb),4.0,2026.0,2026-04,4000.0
+primer_0062.jpg,primer,()1),2026-04-01,True,Ekonomi /Wing 5000,6.0,4500.0,27000.0,Sangat Murah (<=5rb),4.0,2026.0,2026-04,5400.0
+primer_0062.jpg,primer,()1),2026-04-01,True,Ekonomi/ Wing 2000,6.0,1800.0,10800.0,Sangat Murah (<=5rb),4.0,2026.0,2026-04,2160.0
+primer_0063.jpg,primer,2153192428,2015-10-20,True,Ale Ale Cucopandan Cup 180 Ml,1.0,19500.0,19500.0,Murah (5-20rb),10.0,2015.0,2015-10,3900.0
+primer_0063.jpg,primer,2153192428,2015-10-20,True,Ale Ale Mangca Cup 180,24.0,780.0,18720.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,3744.0
+primer_0063.jpg,primer,2153192428,2015-10-20,True,Foodrtd Kopi Nongkrong 1Sohl Isi 24,24.0,19500.0,468000.0,Murah (5-20rb),10.0,2015.0,2015-10,93600.0
+primer_0063.jpg,primer,2153192428,2015-10-20,True,Olala Anggur Cup 15O H,24.0,19500.0,468000.0,Murah (5-20rb),10.0,2015.0,2015-10,93600.0
+primer_0063.jpg,primer,2153192428,2015-10-20,True,Mama Lehon Jeruk Nipis Pch 1Osml,1.0,1600.0,1600.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,320.0
+primer_0063.jpg,primer,2153192428,2015-10-20,True,Sedaap Mie Soreng Ala Chef Bag 93Gr,1.0,32988.0,32988.0,Sedang (20-50rb),10.0,2015.0,2015-10,6597.6
+primer_0063.jpg,primer,2153192428,2015-10-20,True,Toples 123X123X6I Mn Sedaap,1.0,352855.4000000004,24002356.0,Sangat Mahal (>100rb),10.0,2015.0,2015-10,4800471.2
+primer_0063.jpg,primer,2153192428,2015-10-20,True,Sukses Mie Coreng Ayam Kremes Boc 13Rck,1.0,84650.0,84650.0,Mahal (50-100rb),10.0,2015.0,2015-10,16930.0
+primer_0064.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Giu Hhite Rarsuop Dengkoang Ktk72Gr,1.0,2650.0,2650.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,530.0
+primer_0064.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,V Ale Ale Cocopamdan Cup 1So Hl,1.0,19500.0,19500.0,Murah (5-20rb),10.0,2015.0,2015-10,3900.0
+primer_0065.jpg,primer,2153425108,2015-10-20,True,Soklin Poader Dei Eqp Rtru 43 Crr7,7.0,775.0,5425.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,1085.0
+primer_0067.jpg,primer,Pulut Arta Sejahtera,,False,Sedaap Kcp 2606,2.0,9000.0,18000.0,Murah (5-20rb),,,NaT,3600.0
+primer_0067.jpg,primer,Pulut Arta Sejahtera,,False,Sosro Teh 30S,1.0,8200.0,8200.0,Murah (5-20rb),,,NaT,1640.0
+primer_0067.jpg,primer,Pulut Arta Sejahtera,,False,Refina Grm 600G,1.0,11200.0,11200.0,Murah (5-20rb),,,NaT,2240.0
+primer_0067.jpg,primer,Pulut Arta Sejahtera,,False,Ramenyes Ckns8G,3.0,3600.0,10800.0,Sangat Murah (<=5rb),,,NaT,2160.0
+primer_0067.jpg,primer,Pulut Arta Sejahtera,,False,Sedaap Aym L89G,3.0,3300.0,9900.0,Sangat Murah (<=5rb),,,NaT,1980.0
+primer_0067.jpg,primer,Pulut Arta Sejahtera,,False,Sedaap Baym250G,1.0,9900.0,9900.0,Murah (5-20rb),,,NaT,1980.0
+primer_0070.jpg,primer,2198017806,2015-10-20,True,Teh Rio Sula Atu Cup 18L,24.0,9639.0,231336.0,Murah (5-20rb),10.0,2015.0,2015-10,46267.200000000004
+primer_0070.jpg,primer,2198017806,2015-10-20,True,Fuodrto Flosedtna Cuc 35Oml Isi 12,10.0,27530.0,275300.0,Sedang (20-50rb),10.0,2015.0,2015-10,55060.0
+primer_0071.jpg,primer,Tokosukatam,2026-01-24,True,Forvita Sachet,10.0,5500.0,55000.0,Murah (5-20rb),1.0,2026.0,2026-01,11000.0
+primer_0071.jpg,primer,Tokosukatam,2026-01-24,True,Sun Kara Tca 65M,1.0,155000.0,155000.0,Sangat Mahal (>100rb),1.0,2026.0,2026-01,31000.0
+primer_0071.jpg,primer,Tokosukatam,2026-01-24,True,Ter Igu Segi Tiga Curah,4.0,9000.0,36000.0,Murah (5-20rb),1.0,2026.0,2026-01,7200.0
+primer_0071.jpg,primer,Tokosukatam,2026-01-24,True,Susu Jahe Sido Muncul,1.0,16000.0,16000.0,Murah (5-20rb),1.0,2026.0,2026-01,3200.0
+primer_0071.jpg,primer,Tokosukatam,2026-01-24,True,Tepung Beras Rose Brand,6.0,7000.0,42000.0,Murah (5-20rb),1.0,2026.0,2026-01,8400.0
+primer_0071.jpg,primer,Tokosukatam,2026-01-24,True,Milo Choclate Sachet,1.0,19000.0,19000.0,Murah (5-20rb),1.0,2026.0,2026-01,3800.0
+primer_0071.jpg,primer,Tokosukatam,2026-01-24,True,Terasi Abc,2.0,7000.0,14000.0,Murah (5-20rb),1.0,2026.0,2026-01,2800.0
+primer_0071.jpg,primer,Tokosukatam,2026-01-24,True,Ff Sachet Biru/ Coklat,2.0,8000.0,16000.0,Murah (5-20rb),1.0,2026.0,2026-01,3200.0
+primer_0072.jpg,primer,Famartpondok Duta Ra/0812 94661837,,False,Kinoyzu 320Ml,1.0,7700.0,7700.0,Murah (5-20rb),,,NaT,1540.0
+primer_0072.jpg,primer,Famartpondok Duta Ra/0812 94661837,,False,Totole Jmr 40G,2.0,6900.0,13800.0,Murah (5-20rb),,,NaT,2760.0
+primer_0079.jpg,primer,Tlogomas44 Malang 08113336422,2022-01-21,True,Nestle Pure Life 600,2.0,3600.0,7200.0,Sangat Murah (<=5rb),1.0,2022.0,2022-01,1440.0
+primer_0079.jpg,primer,Tlogomas44 Malang 08113336422,2022-01-21,True,Le Minerale 6Ooml,2.0,3500.0,7000.0,Sangat Murah (<=5rb),1.0,2022.0,2022-01,1400.0
+primer_0079.jpg,primer,Tlogomas44 Malang 08113336422,2022-01-21,True,Ultra Kcng Hijau 250,1.0,4900.0,4900.0,Sangat Murah (<=5rb),1.0,2022.0,2022-01,980.0
+primer_0079.jpg,primer,Tlogomas44 Malang 08113336422,2022-01-21,True,Nutrijel Pwd.Strw.15,2.0,6600.0,13200.0,Murah (5-20rb),1.0,2022.0,2022-01,2640.0
+primer_0079.jpg,primer,Tlogomas44 Malang 08113336422,2022-01-21,True,Knzler Sngleskju 65,1.0,8700.0,8700.0,Murah (5-20rb),1.0,2022.0,2022-01,1740.0
+primer_0079.jpg,primer,Tlogomas44 Malang 08113336422,2022-01-21,True,Knzler Sngles Hot 65,1.0,8700.0,8700.0,Murah (5-20rb),1.0,2022.0,2022-01,1740.0
+primer_0079.jpg,primer,Tlogomas44 Malang 08113336422,2022-01-21,True,Kanzlr Bakso Ori 48G,2.0,8700.0,17400.0,Murah (5-20rb),1.0,2022.0,2022-01,3480.0
+primer_0080.jpg,primer,2153228346,2015-10-20,True,Ekdnoni Cream Det Violet Cag 38Ogr,1.0,19500.0,19500.0,Murah (5-20rb),10.0,2015.0,2015-10,3900.0
+primer_0080.jpg,primer,2153228346,2015-10-20,True,Olala Jangu Cup 150Ml,24.0,38600.0,926400.0,Sedang (20-50rb),10.0,2015.0,2015-10,185280.0
+primer_0080.jpg,primer,2153228346,2015-10-20,True,Zinc Shampuo Active Fresh Db Sct 1Onl,24.0,8914.0,213936.0,Murah (5-20rb),10.0,2015.0,2015-10,42787.200000000004
+primer_0080.jpg,primer,2153228346,2015-10-20,True,Soklin Liq Det Perfune Jundo Sc 4Oml R7,1.0,2325.0,2325.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,465.0
+primer_0081.jpg,primer,Pt Deook Distribusindo Raya,2015-10-20,True,Sedaap Hie Coreng Ala Chef Bag 93Gk,3.0,2846.0,8538.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,1707.6000000000001
+primer_0081.jpg,primer,Pt Deook Distribusindo Raya,2015-10-20,True,Fdodrtd Florioina Coco 3Soml Isi 12,1.0,8538.0,8538.0,Murah (5-20rb),10.0,2015.0,2015-10,1707.6000000000001
+primer_0081.jpg,primer,Pt Deook Distribusindo Raya,2015-10-20,True,12Fcs,12.0,28500.0,342000.0,Sedang (20-50rb),10.0,2015.0,2015-10,68400.0
+primer_0081.jpg,primer,Pt Deook Distribusindo Raya,2015-10-20,True,Foodrtd Colda Cappuccino 200Misi12,1.0,34800.0,34800.0,Sedang (20-50rb),10.0,2015.0,2015-10,6960.0
+primer_0084.jpg,primer,Pt Denok Distribusindo Raya,2015-10-20,True,24Fcs,6.0,19500.0,117000.0,Murah (5-20rb),10.0,2015.0,2015-10,23400.0
+primer_0084.jpg,primer,Pt Denok Distribusindo Raya,2015-10-20,True,Lala Anggur Cup 150,1.0,19500.0,19500.0,Murah (5-20rb),10.0,2015.0,2015-10,3900.0
+primer_0084.jpg,primer,Pt Denok Distribusindo Raya,2015-10-20,True,Olala Jahgu Cup150Ml,24.0,38600.0,926400.0,Sedang (20-50rb),10.0,2015.0,2015-10,185280.0
+primer_0084.jpg,primer,Pt Denok Distribusindo Raya,2015-10-20,True,1Fcs,45.0,775.0,34875.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,6975.0
+primer_0084.jpg,primer,Pt Denok Distribusindo Raya,2015-10-20,True,Sdklin Liq Det Uidlet Junoo Sct 4Oml R7,21.0,775.0,16275.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,3255.0
+primer_0085.jpg,primer,Tongtji,2025-10-13,True,Tong Tji Celup Jasmine Isi 15,3.0,5700.0,17100.0,Murah (5-20rb),10.0,2025.0,2025-10,3420.0
+primer_0086.jpg,primer,2153288346,2015-10-20,True,Sedaap Hie Coreng Ala Chef Bag 936R,3.0,8538.0,25614.0,Murah (5-20rb),10.0,2015.0,2015-10,5122.8
+primer_0086.jpg,primer,2153288346,2015-10-20,True,Sedaap Mee Cureng Bas 9Icr,3.0,30000.0,90000.0,Sedang (20-50rb),10.0,2015.0,2015-10,18000.0
+primer_0086.jpg,primer,2153288346,2015-10-20,True,Fdodrtd Florioima Cock 3Soml Isi 12,12.0,570.0,6840.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,1368.0
+primer_0090.jpg,primer,Pok Distribusindo Kaya,2015-10-20,True,Ckomoai Creadet Lehon9Oo Rag 38Ogr,12.0,8500.0,102000.0,Murah (5-20rb),10.0,2015.0,2015-10,20400.0
+primer_0090.jpg,primer,Pok Distribusindo Kaya,2015-10-20,True,Ale Ale Nangga Cup 180,24.0,19500.0,468000.0,Murah (5-20rb),10.0,2015.0,2015-10,93600.0
+primer_0090.jpg,primer,Pok Distribusindo Kaya,2015-10-20,True,24Fcs,1.0,19500.0,19500.0,Murah (5-20rb),10.0,2015.0,2015-10,3900.0
+primer_0090.jpg,primer,Pok Distribusindo Kaya,2015-10-20,True,Liodishh Hana Jerurnipis Pouch 490 6,24.0,10706.0,256944.0,Murah (5-20rb),10.0,2015.0,2015-10,51388.8
+primer_0090.jpg,primer,Pok Distribusindo Kaya,2015-10-20,True,Foodrtd Floridina Coci 3So Ist 12,1.0,30000.0,30000.0,Sedang (20-50rb),10.0,2015.0,2015-10,6000.0
+primer_0094.jpg,primer,Ft Depok Tistribusindo Raya,2015-10-20,True,Sukses Mie Soreng Ayan Krenes Bag 133R,1.0,30000.0,30000.0,Sedang (20-50rb),10.0,2015.0,2015-10,6000.0
+primer_0094.jpg,primer,Ft Depok Tistribusindo Raya,2015-10-20,True,Foodrtd Flortdina Cocd 3Soi Ist12,12.0,94000.0,1128000.0,Mahal (50-100rb),10.0,2015.0,2015-10,225600.0
+primer_0095.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Kopi Top Gula Arer220R15,90.0,1680.0,151200.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,30240.0
+primer_0095.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Sedaaf Mie Goreng Bag 91Cr,10.0,284590.0,2845900.0,Sangat Mahal (>100rb),10.0,2015.0,2015-10,569180.0
+primer_0095.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Foudrtd Isoplus Coco Tl 35Onl Is112,12.0,28500.0,342000.0,Sedang (20-50rb),10.0,2015.0,2015-10,68400.0
+primer_0095.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,12Fcs,1.0,34800.0,34800.0,Sedang (20-50rb),10.0,2015.0,2015-10,6960.0
+primer_0095.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,10Fcs,1.0,2325.0,2325.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,465.0
+primer_0095.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Potadee Resular Dbq Deef 1Sgr Rencens,10.0,16000.0,160000.0,Murah (5-20rb),10.0,2015.0,2015-10,32000.0
+primer_0095.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Putapee Regular Crld Seaneedlscr Remceng,1.0,16398.0,16398.0,Murah (5-20rb),10.0,2015.0,2015-10,3279.6000000000004
+primer_0096.jpg,primer,Tong,2026-01-19,True,Tong Tji Celup Jasmine Tanpa Amplop,10.0,9350.0,93500.0,Murah (5-20rb),1.0,2026.0,2026-01,18700.0
+primer_0099.jpg,primer,Pt.Lancar Wiguna Sejahtera,2026-04-11,True,Me-0 Ktn Tna80G,2.0,8500.0,17000.0,Murah (5-20rb),4.0,2026.0,2026-04,3400.0
+primer_0099.jpg,primer,Pt.Lancar Wiguna Sejahtera,2026-04-11,True,Lw Tas Kecil,1.0,3500.0,3500.0,Sangat Murah (<=5rb),4.0,2026.0,2026-04,700.0
+primer_0101.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Erondmi Cream Det Lehonso0 Bag 145Gr,5.0,1700.0,8500.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,1700.0
+primer_0101.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Foodrtd Kopi Nonckrong 15Oml.Is24,1.0,19500.0,19500.0,Murah (5-20rb),10.0,2015.0,2015-10,3900.0
+primer_0101.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,1Fcs,90.0,204586.0,18412740.0,Sangat Mahal (>100rb),10.0,2015.0,2015-10,3682548.0
+primer_0101.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,24P03,1.0,84650.0,84650.0,Mahal (50-100rb),10.0,2015.0,2015-10,16930.0
+primer_0101.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,1Fcs,3.0,270967.0,812901.0,Sangat Mahal (>100rb),10.0,2015.0,2015-10,162580.2
+primer_0101.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,12Cs,1.0,34800.0,34800.0,Sedang (20-50rb),10.0,2015.0,2015-10,6960.0
+primer_0103.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Soklnpordet Eop Rtr 43Crr7,1.0,775.0,775.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,155.0
+primer_0103.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Soklinpohder Det Eoppunple 43Crr7,1.0,775.0,775.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,155.0
+primer_0103.jpg,primer,Pt Depok Distribusindo Raya,2015-10-20,True,Potadee Recilar Bed Deeflsgr Rehcchg,10.0,1639.0,16390.0,Sangat Murah (<=5rb),10.0,2015.0,2015-10,3278.0
+primer_0105.jpg,primer,Mixue,2024-05-12,True,Mixue Ice Cream,2.0,4000.0,8000.0,Sangat Murah (<=5rb),5.0,2024.0,2024-05,1600.0
+primer_0108.jpg,primer,Ptoomfa,2026-03-28,True,Panadol Caplei Ext1O,2.0,15500.0,31000.0,Murah (5-20rb),3.0,2026.0,2026-03,6200.0
+primer_0108.jpg,primer,Ptoomfa,2026-03-28,True,Hemaviton Action S S,1.0,9000.0,9000.0,Murah (5-20rb),3.0,2026.0,2026-03,1800.0
+primer_0109.jpg,primer,Nota Penjualan (Asli),2025-09-29,True,Aq.1500Ml1X12,2.0,53500.0,107000.0,Mahal (50-100rb),9.0,2025.0,2025-09,21400.0
+primer_0110.jpg,primer,Iomarcop,,False,Sato Fz Beef Ykniku,1.0,32000.0,32000.0,Sedang (20-50rb),,,NaT,6400.0
+primer_0115.jpg,primer,P7 Depol Distribugndo Rays,2025-01-16,True,Ciu Hijab Ban Suap Teh & Zritun Ktk 72G,10.0,25150.0,251500.0,Sedang (20-50rb),1.0,2025.0,2025-01,50300.0
+primer_0115.jpg,primer,P7 Depol Distribugndo Rays,2025-01-16,True,Ekonoie Crean Det Lenomsoo Drg 145Gk,1.0,17000.0,17000.0,Murah (5-20rb),1.0,2025.0,2025-01,3400.0
+primer_0115.jpg,primer,P7 Depol Distribugndo Rays,2025-01-16,True,Eronumt Cnean Detuioletsoo Dag 145Cr,1.0,15000.0,15000.0,Murah (5-20rb),1.0,2025.0,2025-01,3000.0
+primer_0115.jpg,primer,P7 Depol Distribugndo Rays,2025-01-16,True,Soklta Lahtat Htjauhuoa Apel Pch S2M,10.0,16500.0,165000.0,Murah (5-20rb),1.0,2025.0,2025-01,33000.0
+primer_0115.jpg,primer,P7 Depol Distribugndo Rays,2025-01-16,True,Somlinlioud Oet Sokuna Jumdusct 40M,35.0,19239.0,673365.0,Murah (5-20rb),1.0,2025.0,2025-01,134673.0
+primer_0115.jpg,primer,P7 Depol Distribugndo Rays,2025-01-16,True,Surseshie Cokeng Ryrn Kreresbag13Sn,1.0,25200.0,25200.0,Sedang (20-50rb),1.0,2025.0,2025-01,5040.0
+primer_0116.jpg,primer,Pt. Lancar Higuna Sejahtera,2026-04-04,True,Hemav Ls 330Ml,1.0,7800.0,7800.0,Murah (5-20rb),4.0,2026.0,2026-04,1560.0
+primer_0116.jpg,primer,Pt. Lancar Higuna Sejahtera,2026-04-04,True,Me-O Tuna 80G,2.0,8200.0,16400.0,Murah (5-20rb),4.0,2026.0,2026-04,3280.0
+primer_0117.jpg,primer,Sms/Vh01004U886,2026-05-12,True,Rose Gulakng1Kg,1.0,17500.0,17500.0,Murah (5-20rb),5.0,2026.0,2026-05,3500.0
+primer_0117.jpg,primer,Sms/Vh01004U886,2026-05-12,True,Suksess2 Ac140G,1.0,4300.0,4300.0,Sangat Murah (<=5rb),5.0,2026.0,2026-05,860.0
+primer_0117.jpg,primer,Sms/Vh01004U886,2026-05-12,True,Suksess Aym129G,1.0,4300.0,4300.0,Sangat Murah (<=5rb),5.0,2026.0,2026-05,860.0
+primer_0117.jpg,primer,Sms/Vh01004U886,2026-05-12,True,Suksess2 Rd132G,1.0,4300.0,4300.0,Sangat Murah (<=5rb),5.0,2026.0,2026-05,860.0
+primer_0117.jpg,primer,Sms/Vh01004U886,2026-05-12,True,V-Soy Soy 300Ml,1.0,14600.0,14600.0,Murah (5-20rb),5.0,2026.0,2026-05,2920.0
