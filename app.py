@@ -253,35 +253,37 @@ elif menu == "BQ1: Performa OCR":
     """)
 
 # --- BQ2: ESTIMASI LABA ---
-# --- BQ2: ESTIMASI LABA ---
 elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
-    st.markdown("Sistem menghitung perkiraan laba berdasarkan total pengeluaran item struk belanja dan persentase margin keuntungan standar.")
+    st.markdown("Sistem menampilkan perkiraan laba berdasarkan data terstruktur hasil ekstraksi OCR yang telah melalui proses *cleaning* akhir.")
     
-    # 1. MENGGUNAKAN DATASET REVISI TERBARU (dataset_ocr_clear_final)
-    # Pastikan di fungsi load_data() kamu sudah membaca 'dataset_ocr_clear_final.csv' ke dalam variabel df_clean
+    # 1. PENGATURAN DEMO STRUK (Mengunci pada primer_0079.jpg sesuai notebook)
     sample_file = 'primer_0079.jpg'
     
-    # Filter data berdasarkan demo struk dari dataset bersih revisi
+    # Filter data menggunakan df_clean (yang berisi dataset_ocr_clear_final.csv)
     sample_struk = df_clean[df_clean['filename'] == sample_file].copy()
     
-    # Margin dikunci pada 20% (persen_margin=0.20) sesuai standar pengujian di notebook
-    margin_tetap = 20
-    sample_struk['laba_total'] = sample_struk['total_harga_item'] * (margin_tetap / 100)
+    # Memastikan kolom laba tersedia. Jika di dataset namanya 'laba_total' pakai itu, 
+    # jika belum ada, sistem akan membuatkannya otomatis dengan margin 20%
+    if 'laba_total' not in sample_struk.columns:
+        if 'estimasi_laba_20' in sample_struk.columns:
+            sample_struk['laba_total'] = sample_struk['estimasi_laba_20']
+        else:
+            sample_struk['laba_total'] = sample_struk['total_harga_item'] * 0.20
+
+    st.subheader(f"📊 Demo Hasil Perhitungan Laba (Struk: {sample_file})")
     
-    st.subheader(f"📊 Demo Hasil Perhitungan Laba (Struk: {sample_file}, Margin: {margin_tetap}%)")
+    # 2. TAMPILKAN TABEL DEMO STRUK (Replikasi fungsi display dari Notebook)
+    # Menyesuaikan kolom yang akan ditampilkan agar informatif bagi user/dosen
+    kolom_tampilan = ['nama_toko', 'tanggal', 'nama_barang', 'jumlah_barang', 'harga_satuan', 'total_harga_item', 'laba_total']
+    kolom_tersedia = [col for col in kolom_tampilan if col in sample_struk.columns]
     
-    # TAMPILKAN TABEL DEMO STRUK (Replikasi dari fungsi display di notebook)
-    # Menampilkan kolom-kolom dari dataset_ocr_clear_final yang sudah bersih
-    kolom_laba = ['nama_toko', 'tanggal', 'nama_barang', 'jumlah_barang', 'harga_satuan', 'total_harga_item', 'laba_total']
-    kolom_tersedia = [col for col in kolom_laba if col in sample_struk.columns]
-    
-    st.write("Tabel representasi data terstruktur transaksional item pada demo struk (Dataset Bersih Revisi):")
+    st.write("Tabel representasi data terstruktur transaksional item pada demo struk (Dataset Bersih Final):")
     st.dataframe(sample_struk[kolom_tersedia], use_container_width=True)
     
     st.divider()
     
-    # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart)
+    # 3. VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart)
     st.write("### Visualisasi Top 15 Komoditas Berdasarkan Estimasi Laba")
     
     df_plot = (
@@ -293,7 +295,7 @@ elif menu == "BQ2: Estimasi Laba":
     if not df_plot.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
         
-        # Casting string secara inline untuk mencegah urutan teks error pada matplotlib web
+        # Casting ke string untuk nama_barang agar rendering teks matplotlib aman di web
         bars = ax.barh(
             [str(x) for x in df_plot['nama_barang']], 
             df_plot['laba_total'].tolist(),
@@ -307,9 +309,9 @@ elif menu == "BQ2: Estimasi Laba":
         ax.set_xlabel('Estimasi Laba Total (Rp)')
         
         plt.tight_layout()
-        st.pyplot(fig) # Render grafik ke web Streamlit
+        st.pyplot(fig) # Render grafik ke halaman web Streamlit
     else:
-        st.warning(f"Tidak ada data transaksi valid pada file {sample_file} dengan keuntungan di atas Rp 0 untuk ditampilkan.")
+        st.warning(f"Tidak ada data transaksi valid pada file {sample_file} untuk divisualisasikan.")
 
     st.divider()
 
