@@ -63,26 +63,110 @@ if menu == "Home":
     st.image("https://via.placeholder.com/800x200.png?text=Nota+Pintar+UMKM+Digital", use_column_width=True)
 
 # --- BQ1: PERFORMA OCR ---
+# --- BQ1: PERFORMA OCR ---
 elif menu == "BQ1: Performa OCR":
     st.header("🔍 BQ1: Bagaimana performa teknologi OCR dalam mengekstrak informasi?")
     
-    col1, col2 = st.columns(2)
+    # Menampilkan Tabel Utama Komparasi
+    col1, col2 = st.columns([3, 2])
     with col1:
-        st.subheader("Perbandingan Model")
-        st.dataframe(df_evaluasi)
+        st.subheader("Tabel Komparasi Performa Model OCR")
+        st.dataframe(df_evaluasi, use_container_width=True)
     
     with col2:
-        st.write("**Insight:** PaddleOCR dipilih karena memiliki *Success Rate* tertinggi (73.3%) dibandingkan Tesseract dan EasyOCR.")
+        st.subheader("Rekomendasi Utama")
+        st.success("""
+        **PaddleOCR** dipilih sebagai model produksi karena menawarkan kombinasi metrik yang paling stabil, tingkat keberhasilan parsing data komoditas tertinggi, serta waktu komputasi yang masih dapat ditoleransi.
+        """)
 
     st.divider()
     
-    # Grafik Bar Metrik Performa
-    st.subheader("Visualisasi Metrik Akurasi")
-    metrik = st.selectbox("Pilih Metrik", ["Success Rate (%)", "Rata-rata Waktu (Detik)", "Akurasi Total Harga (%)"])
+    # 1. VISUALISASI GRID BAR CHART (2x2)
+    st.subheader("📊 Komparasi Performa 3 Model OCR (Grid Metrics)")
     
-    fig, ax = plt.subplots()
-    sns.barplot(x="Nama Model", y=metrik, data=df_evaluasi, palette="viridis", ax=ax)
+    models = df_evaluasi['Nama Model']
+    colors_bar = ['steelblue', 'tomato', 'mediumseagreen']
+
+    metrics_list = [
+        ('Success Rate (%)', 'Success Rate (%)', 'Persentase (%)', '%.1f%%'),
+        ('Rata-rata Waktu (Detik)', 'Rata-rata Waktu Proses (Detik)', 'Detik', '%.2f'),
+        ('Akurasi Jumlah Item (%)', 'Akurasi Jumlah Item (%)', 'Persentase (%)', '%.1f%%'),
+        ('Akurasi Total Harga (%)', 'Akurasi Total Harga (%)', 'Persentase (%)', '%.1f%%')
+    ]
+
+    fig, axes = plt.subplots(2, 2, figsize=(14, 9))
+    axes = axes.flatten()
+
+    for ax, (col, title, ylabel, fmt) in zip(axes, metrics_list):
+        bars = ax.bar(
+            models,
+            df_evaluasi[col],
+            color=colors_bar,
+            alpha=0.85,
+            edgecolor='white'
+        )
+        ax.bar_label(bars, fmt=fmt, padding=3)
+        ax.set_title(title, fontweight='bold', fontsize=11)
+        ax.set_ylabel(ylabel)
+        if '%' in col:
+            ax.set_ylim(0, 100)
+
+    plt.tight_layout()
     st.pyplot(fig)
+
+    st.divider()
+
+    # 2. VISUALISASI PIE CHART DISTRIBUSI STATUS PARSING
+    st.subheader("🍕 Distribusi Status Parsing per Model OCR")
+    
+    # Ambil data pengelompokkan status berdasarkan df_detail
+    status_counts = df_detail.groupby(['Model', 'Status']).size().unstack(fill_value=0)
+    
+    label_map = {
+        'Sebagian (Terekstrak tapi ada miss)': 'Sebagian',
+        'Sempurna (100%)': 'Sempurna',
+        'Gagal Total (0%)': 'Gagal Total'
+    }
+    status_counts = status_counts.rename(columns=label_map)
+
+    fig2, axes2 = plt.subplots(1, 3, figsize=(16, 5))
+    colors_status = ['steelblue', 'mediumseagreen', 'tomato']
+    model_names = ['Paddle', 'Tesseract', 'EasyOCR']
+
+    for ax, model in zip(axes2, model_names):
+        if model in status_counts.index:
+            data = status_counts.loc[model]
+            # Sinkronisasi warna jika ada kategori status yang kosong
+            current_colors = colors_status[:len(data)]
+            
+            ax.pie(
+                data.values,
+                labels=data.index,
+                autopct='%1.1f%%',
+                colors=current_colors,
+                startangle=90,
+                textprops={'fontsize': 10}
+            )
+            ax.set_title(f'Status Parsing — {model}', fontweight='bold', fontsize=12)
+        else:
+            ax.text(0.5, 0.5, f'Data {model}\nTidak Ditemukan', ha='center', va='center')
+            ax.axis('off')
+
+    plt.tight_layout()
+    st.pyplot(fig2)
+
+    st.divider()
+
+    # 3. BAGIAN INSIGHT RESMI BQ1
+    st.subheader("💡 Insight Analisis Pertanyaan Bisnis 1")
+    st.markdown("""
+    Berdasarkan hasil evaluasi pembuktian di atas, **Paddle memiliki performa paling seimbang** dibandingkan Tesseract dan EasyOCR. 
+    * **Paddle** memperoleh *success rate* tertinggi sebesar **73.33%** dan akurasi total harga tertinggi sebesar **26.09%**, meskipun waktu prosesnya sedikit lebih lama dibandingkan Tesseract.
+    * **Tesseract** memiliki waktu proses paling cepat (**2.64 detik**), tetapi akurasi jumlah item dan total harga paling rendah sehingga kurang andal untuk ekstraksi data transaksi nyata.
+    * **EasyOCR** memiliki akurasi jumlah item tertinggi (**33.5%**), namun waktu prosesnya sangat lambat (**18.73 detik**) dan akurasi total harga paling rendah (**14.0%**), sehingga tidak efisien untuk kebutuhan *deployment* sistem.
+
+    **Kesimpulan Dokumen:** Dengan demikian, **Paddle** resmi dipilih sebagai arsitektur OCR untuk proyek **NOPI (Nota Pintar)** ini karena memiliki titik temu keseimbangan terbaik (*trade-off*) antara keberhasilan parsing, akurasi nilai harga finansial, dan efisiensi waktu pemrosesan yang wajar.
+    """)
 
 # --- BQ2: ESTIMASI LABA ---
 elif menu == "BQ2: Estimasi Laba":
