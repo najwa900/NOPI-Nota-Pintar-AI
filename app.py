@@ -169,6 +169,7 @@ elif menu == "BQ1: Performa OCR":
     """)
 
 # --- BQ2: ESTIMASI LABA ---
+# --- BQ2: ESTIMASI LABA ---
 elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
     st.markdown("Sistem menghitung perkiraan laba secara otomatis berdasarkan total pengeluaran item struk belanja dan persentase margin keuntungan yang ditentukan pengguna.")
@@ -182,10 +183,6 @@ elif menu == "BQ2: Estimasi Laba":
     # Menghitung laba total per item sesuai logika notebook (Total Harga dikali Persentase Margin)
     df_laba['laba_total'] = df_laba['total_harga_item'] * (margin / 100)
     
-    # Menampilkan Ringkasan Metrik Laba
-    total_estimasi_laba = df_laba['laba_total'].sum()
-    st.metric(label=f"Total Estimasi Laba Keseluruhan (Margin {margin}%)", value=f"Rp {total_estimasi_laba:,.0f}")
-    
     st.subheader(f"Tabel Estimasi Laba per Item (Margin {margin}%)")
     st.dataframe(df_laba.head(10), use_container_width=True)
     
@@ -194,12 +191,16 @@ elif menu == "BQ2: Estimasi Laba":
     # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart sesuai Notebook)
     st.subheader(f"📊 Top 15 Komoditas Berdasarkan Estimasi Laba (Margin {margin}%)")
     
-    # Filter dan urutkan data sesuai komponen notebook
+    # Filter, bersihkan tipe data nama_barang agar 100% String, lalu urutkan
     df_plot = (
-        df_laba[df_laba['laba_total'] > 0]
-        .sort_values('laba_total')
-        .tail(15)
+        df_laba[df_laba['laba_total'] > 0].copy()
     )
+    # FIX ERROR Matplotlib: Pastikan semua nama barang berupa string murni dan tidak kosong
+    df_plot['nama_barang'] = df_plot['nama_barang'].astype(str).str.strip()
+    df_plot = df_plot[df_plot['nama_barang'] != 'None']
+    
+    # Ambil Top 15 data tertinggi
+    df_plot = df_plot.sort_values('laba_total').tail(15)
     
     if not df_plot.empty:
         # Menggunakan format subplots dengan ukuran proporsional
@@ -207,8 +208,8 @@ elif menu == "BQ2: Estimasi Laba":
         
         # Membuat Horizontal Bar Chart (barh) sesuai notebook
         bars = ax.barh(
-            df_plot['nama_barang'],
-            df_plot['laba_total'],
+            df_plot['nama_barang'].tolist(), # FIX ERROR: diubah ke bentuk list string murni
+            df_plot['laba_total'].tolist(),
             color='mediumseagreen',
             alpha=0.85,
             edgecolor='white'
@@ -232,14 +233,14 @@ elif menu == "BQ2: Estimasi Laba":
     # ### Insight BQ2 RESMI DARI NOTEBOOK ###
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 2")
     st.markdown(f"""
-    Dengan input persentase margin dari pengguna, sistem dapat langsung menghitung estimasi laba per item tanpa perlu memasukkan harga beli satu per satu. Berdasarkan demo struk `primer_0079.jpg` dengan margin {margin}%, total omzet struk sebesar **Rp 67.100** menghasilkan estimasi laba **Rp {67100 * (margin/100):,.0f}** *(Catatan: Nilai ini disesuaikan secara dinamis oleh slider).*
+    Dengan input persentase margin dari pengguna, sistem dapat langsung menghitung estimasi laba per item tanpa perlu memasukkan harga beli satu per satu. Berdasarkan demo struk `primer_0079.jpg` dengan margin {margin}%, total omzet struk sebesar **Rp 67.100** menghasilkan estimasi laba **Rp {67100 * (margin/100):,.0f}**.
 
     Item dengan kontribusi laba tertinggi adalah **Kanzlr Bakso Ori 48G** karena dibeli 2 unit, diikuti **Nutrijel Pwd.Strw.15**. Pola ini menunjukkan bahwa item dengan jumlah beli lebih dari 1 unit berkontribusi lebih besar terhadap total laba meskipun harga satuannya tidak selalu tertinggi.
 
     Pendekatan ini praktis untuk pelaku UMKM yang tidak memiliki sistem pencatatan harga beli terstruktur — cukup input satu angka margin, sistem langsung menghasilkan laporan laba per item yang siap digunakan untuk pembukuan sederhana.
     """)
 
-# --- BQ3: LAPORAN TRANSAKSI ---
+
 # --- BQ3: LAPORAN TRANSAKSI ---
 elif menu == "BQ3: Laporan Transaksi":
     st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur?")
