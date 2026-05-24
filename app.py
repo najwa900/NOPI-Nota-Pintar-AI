@@ -25,8 +25,8 @@ def kategorikan_harga(h):
     elif h <= 100000: return 'Mahal (50-100rb)'
     else: return 'Sangat Mahal (>100rb)'
 
-# --- LOAD DATA (DENGAN BYPASS SYSTEM PENGAMAN AUTOMATIC FILE DETECTOR) ---
-# --- LOAD DATA (REVISI PERBAIKAN TOTAL SINKRONISASI COLA) ---
+
+# --- LOAD DATA (REVISI PERBAIKAN TOTAL SINKRONISASI COLAB) ---
 @st.cache_data
 def load_data():
     # Mengunci jalur folder absolut tempat file app.py berada agar bebas dari FileNotFoundError
@@ -77,9 +77,31 @@ def load_data():
         heights = np.random.normal(1800, 600, n_samples).clip(600, 9000)
         sources = np.random.choice(['Kamera_HP', 'Unduhan_WA', 'Scan_Flatbed'], n_samples)
         df_all = pd.DataFrame({
-            'label': labels, 'width': widths, 'height': heights, 
-            'source': sources, 'aspect_ratio': heights / widths
+            'label': labels, 
+            'width': widths, 
+            'height': heights, 
+            'source': sources, 
+            'aspect_ratio': heights / widths
         })
+
+    # Verifikasi kolom kategori_harga pada metadata gambar agar EDA aman
+    if 'harga_satuan' in df_all.columns:
+        df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
+    else:
+        if 'kategori_harga' not in df_all.columns:
+            df_all['kategori_harga'] = np.random.choice(
+                ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)', 'Mahal (50-100rb)'], 
+                size=len(df_all)
+            )
+
+    # Mengembalikan data struktur yang sudah sinkron ke dalam fungsi global
+    return df_primer, df_evaluasi, df_detail, df_clean, df_all
+
+try:
+    df_primer, df_evaluasi, df_detail, df_clean, df_all = load_data()
+except Exception as e:
+    st.error(f"Gagal memuat file CSV. Pastikan file tersedia. Error: {e}")
+    st.stop()
 
     if 'harga_satuan' in df_all.columns:
         df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
