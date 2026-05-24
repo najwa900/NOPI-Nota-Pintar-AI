@@ -230,25 +230,12 @@ elif menu == "BQ2: Estimasi Laba":
 
 # --- BQ3: LAPORAN TRANSAKSI ---
 elif menu == "BQ3: Laporan Transaksi":
-    st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur?")
-    st.markdown("Hasil konversi dari teks mentah OCR nota belanja menjadi basis data tabel transaksional terstruktur yang siap pakai untuk pembukuan digital.")
+    st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur untuk mendukung pengambilan keputusan bisnis??")
     
     # Perlu import matplotlib ticker untuk memformat sumbu X pada histogram
     import matplotlib.ticker as mticker
 
-    # Metrik Ringkasan
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Total Item Bersih", len(df_clean))
-    m2.metric("Median Harga Satuan", f"Rp {df_clean['harga_satuan'].median():,.0f}")
-    
-    mode_item = df_clean['nama_barang'].mode()
-    m3.metric("Item Paling Banyak Dibeli", mode_item[0] if not mode_item.empty else "N/A")
-    
-    st.divider()
-    
-    # 1. VISUALISASI GRID: DISTRIBUSI DATA TRANSAKSI (1x2)
-    st.subheader("📊 Distribusi Komponen Transaksi")
-    
+    # 1. VISUALISASI GRID: DISTRIBUSI DATA TRANSAKSI
     df_harga = df_clean[df_clean['harga_satuan'] > 0]
     median_harga = df_harga['harga_satuan'].median()
 
@@ -262,6 +249,7 @@ elif menu == "BQ3: Laporan Transaksi":
         alpha=0.8,
         edgecolor='white'
     )
+
     axes[0].axvline(
         median_harga,
         color='tomato',
@@ -269,6 +257,7 @@ elif menu == "BQ3: Laporan Transaksi":
         linewidth=2,
         label=f'Median: Rp {median_harga:,.0f}'
     )
+
     axes[0].set_title('Distribusi Harga Satuan Item', fontweight='bold')
     axes[0].set_xlabel('Harga Satuan (Rp)')
     axes[0].set_ylabel('Frekuensi')
@@ -280,79 +269,71 @@ elif menu == "BQ3: Laporan Transaksi":
     # Chart 2: Distribusi jumlah barang
     jumlah_counts = df_clean['jumlah_barang'].value_counts().sort_index().head(10)
 
-    bars1 = axes[1].bar(
+    bars = axes[1].bar(
         jumlah_counts.index.astype(str),
         jumlah_counts.values,
         color='mediumseagreen',
         alpha=0.85,
         edgecolor='white'
     )
-    axes[1].bar_label(bars1, padding=3)
+
+    axes[1].bar_label(bars, padding=3)
     axes[1].set_title('Distribusi Jumlah Barang per Baris Transaksi', fontweight='bold')
     axes[1].set_xlabel('Jumlah Barang')
     axes[1].set_ylabel('Frekuensi')
 
     plt.suptitle('BQ3 — Distribusi Data Transaksi', fontsize=14, fontweight='bold')
     plt.tight_layout()
-    st.pyplot(fig)
-    
-    st.divider()
-
-    col_plots, col_table = st.columns([1, 1])
-
-    with col_plots:
-        # 2. VISUALISASI SEGMENTASI KATEGORI HARGA
-        st.subheader("🍕 Segmentasi Berdasarkan Kategori Harga")
-        
-        kat_order = [
-            'Sangat Murah (<=5rb)',
-            'Murah (5-20rb)',
-            'Sedang (20-50rb)',
-            'Mahal (50-100rb)',
-            'Sangat Mahal (>100rb)'
-        ]
-        kat_counts = df_clean['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
-
-        fig2, ax2 = plt.subplots(figsize=(8, 5))
-        colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
-
-        bars2 = ax2.barh(
-            kat_counts.index,
-            kat_counts.values,
-            color=colors_kat,
-            alpha=0.85,
-            edgecolor='white'
-        )
-        ax2.bar_label(bars2, padding=3, fontsize=10)
-        ax2.set_title('BQ3 — Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
-        ax2.set_xlabel('Jumlah Item')
-        
-        plt.tight_layout()
-        st.pyplot(fig2)
-
-    with col_table:
-        # TAMPILKAN TABEL DATA TERSTRUKTUR
-        st.subheader("📂 Pratinjau Lembar Dokumen Transaksi")
-        st.write("Data transaksional terstruktur yang siap dipakai:")
-        st.dataframe(
-            df_clean[['nama_toko', 'tanggal', 'nama_barang', 'harga_satuan', 'kategori_harga']].head(12), 
-            use_container_width=True
-        )
+    st.pyplot(fig) # Render langsung ke kanvas Streamlit
 
     st.divider()
 
-    # 3. GENERASI DATA AGREGASI & VISUALISASI TOP STRUK
-    st.subheader("📈 Laporan Akumulasi Finansial Per Struk Nota Belanja")
-    
-    # Membuat dataframe laporan_struk_filtered secara dinamis (berdasarkan filename atau nama_toko)
-    # Menggunakan 'filename' jika ada, atau fallback ke 'nama_toko' untuk mengelompokkan struk
+    # 2. VISUALISASI SEGMENTASI KATEGORI HARGA
+    kat_order = [
+        'Sangat Murah (<=5rb)',
+        'Murah (5-20rb)',
+        'Sedang (20-50rb)',
+        'Mahal (50-100rb)',
+        'Sangat Mahal (>100rb)'
+    ]
+
+    kat_counts = df_clean['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
+
+    fig2, ax2 = plt.subplots(figsize=(8, 5))
+
+    colors_kat = [
+        'steelblue',
+        'mediumseagreen',
+        'orange',
+        'tomato',
+        'mediumpurple'
+    ]
+
+    bars2 = ax2.barh(
+        kat_counts.index,
+        kat_counts.values,
+        color=colors_kat,
+        alpha=0.85,
+        edgecolor='white'
+    )
+
+    ax2.bar_label(bars2, padding=3, fontsize=10)
+    ax2.set_title('BQ3 — Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
+    ax2.set_xlabel('Jumlah Item')
+
+    plt.tight_layout()
+    st.pyplot(fig2)
+
+    st.divider()
+
+    # 3. VISUALISASI TOP STRUK BERDASARKAN TOTAL TRANSAKSI
+    # Memastikan dataframe laporan_struk_filtered terbuat murni dari basis kolom dataset asli
     group_col = 'filename' if 'filename' in df_clean.columns else 'nama_toko'
     
     laporan_struk_filtered = df_clean.groupby(group_col).agg(
         total_transaksi=('total_harga_item', 'sum')
     ).reset_index()
     
-    # Penyesuaian nama kolom untuk kebutuhan plotting
     if group_col != 'filename':
         laporan_struk_filtered = laporan_struk_filtered.rename(columns={group_col: 'filename'})
 
@@ -363,28 +344,26 @@ elif menu == "BQ3: Laporan Transaksi":
         .sort_values('total_transaksi')
     )
 
-    if not top_struk.empty:
-        fig3, ax3 = plt.subplots(figsize=(12, 5))
+    fig3, ax3 = plt.subplots(figsize=(10, 5))
 
-        bars3 = ax3.barh(
-            top_struk['filename'],
-            top_struk['total_transaksi'],
-            color='mediumpurple',
-            alpha=0.85,
-            edgecolor='white'
-        )
-        ax3.bar_label(bars3, fmt='Rp %.0f', padding=3, fontsize=9)
-        ax3.set_title('BQ3 — Struk Teratas berdasarkan Total Transaksi Valid', fontweight='bold')
-        ax3.set_xlabel('Total Transaksi (Rp)')
+    bars3 = ax3.barh(
+        top_struk['filename'],
+        top_struk['total_transaksi'],
+        color='mediumpurple',
+        alpha=0.85,
+        edgecolor='white'
+    )
 
-        plt.tight_layout()
-        st.pyplot(fig3)
-    else:
-        st.warning("Data struk tidak ditemukan untuk membuat grafik komparasi akumulasi.")
+    ax3.bar_label(bars3, fmt='Rp %.0f', padding=3, fontsize=9)
+    ax3.set_title('BQ3 — Struk Teratas berdasarkan Total Transaksi Valid', fontweight='bold')
+    ax3.set_xlabel('Total Transaksi (Rp)')
+
+    plt.tight_layout()
+    st.pyplot(fig3)
 
     st.divider()
 
-    # ### Insight BQ3 RESMI DARI NOTEBOOK ###
+    # 4. INSIGHT BQ3 RESMI DARI NOTEBOOK
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 3")
     st.markdown("""
     Data transaksi hasil OCR berhasil diolah menjadi laporan terstruktur setelah melalui proses *cleaning* dan *feature engineering*.
@@ -395,8 +374,5 @@ elif menu == "BQ3: Laporan Transaksi":
 
     Data dapat diagregasi menjadi laporan ringkas per struk yang memuat nama toko, tanggal, total item, total transaksi, dan estimasi laba. Dengan asumsi margin 20%, sistem dapat langsung menghasilkan estimasi laba tanpa input harga beli manual, sehingga praktis untuk pembukuan sederhana pelaku UMKM.
 
-    > **Catatan Teknis Sidang:** Beberapa nama toko dan nilai total transaksi masih mengandung *noise* OCR residual. Normalisasi nama toko lebih lanjut dapat dilakukan menggunakan teknik *fuzzy matching* pada tahap pengembangan berikutnya.
+    > **Catatan:** Beberapa nama toko dan nilai total transaksi masih mengandung *noise* OCR residual. Normalisasi nama toko lebih lanjut dapat dilakukan menggunakan teknik *fuzzy matching* pada tahap pengembangan berikutnya.
     """)
-
-# Footer
-st.caption("Copyright © 2024 | Proyek NOPI AI Analysis Dashboard")
