@@ -24,24 +24,22 @@ def kategorikan_harga(h):
     elif h <= 100000: return 'Mahal (50-100rb)'
     else: return 'Sangat Mahal (>100rb)'
 
-# --- LOAD DATA ---
+# --- LOAD DATA (REVISI SINKRONISASI 100% DENGAN COLAB) ---
 @st.cache_data
 def load_data():
+    # 1. BACA LANGSUNG DATASET REVISI FINAL YANG SUDAH BERSIH DARI COLAB
+    # Ini menjamin df_clean berisi baris data yang persis sama dengan memori di Colab
+    df_clean = pd.read_csv('data/dataset_ocr_clear_final.csv')
+    
+    # 2. Baca file pendukung evaluasi model OCR lainnya
     df_primer = pd.read_csv('data/Dataset_Terstruktur_Primer_NOPI.csv')
     df_evaluasi = pd.read_csv('data/evaluasi_3_model.csv')
     df_detail = pd.read_csv('data/detail_akurasi_semua_model.csv')
-
-    # Pre-cleaning sederhana untuk dashboard
-    df_clean = df_primer.dropna(subset=['nama_barang', 'harga_satuan']).copy()
-    df_clean['nama_barang'] = df_clean['nama_barang'].apply(clean_nama_barang)
-    df_clean = df_clean[df_clean['harga_satuan'] >= 500]
-    df_clean['kategori_harga'] = df_clean['harga_satuan'].apply(kategorikan_harga)
-
-    # Load dataset gabungan untuk kebutuhan EDA Citra Gambar & CNN
+    
+    # 3. Load dataset gabungan untuk kebutuhan metadata gambar
     try:
         df_all = pd.read_csv('data/all_images_metadata.csv')
     except:
-        # Jika file CSV ringkasan citra belum terbentuk, buat simulasi dataframe agar grafik EDA tidak crash
         np.random.seed(42)
         n_samples = 2117
         labels = ['struk'] * 1058 + ['non_struk'] * 1059
@@ -56,23 +54,17 @@ def load_data():
             'aspect_ratio': heights / widths
         })
 
-    # FIX ERROR KeyError: Pastikan df_all juga memiliki kolom kategori_harga jika ada kolom harga_satuan di dalamnya
+    # Pastikan df_all memiliki kolom kategori_harga agar tidak memicu KeyError
     if 'harga_satuan' in df_all.columns:
         df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
     else:
-        # Jika df_all murni hanya metadata citra (lebar/tinggi), buat kolom kategori_harga tiruan agar menu di bawah tidak crash
         df_all['kategori_harga'] = np.random.choice(
             ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)', 'Mahal (50-100rb)'], 
             size=len(df_all)
         )
 
+    # Kembalikan dataframe yang sudah sinkron murni
     return df_primer, df_evaluasi, df_detail, df_clean, df_all
-
-try:
-    df_primer, df_evaluasi, df_detail, df_clean, df_all = load_data()
-except Exception as e:
-    st.error(f"Gagal memuat file CSV. Pastikan file tersedia. Error: {e}")
-    st.stop()
 
 # --- SIDEBAR NAVIGASI ---
 st.sidebar.title("🚀 NOPI Dashboard")
