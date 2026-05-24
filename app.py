@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import re
+import os
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 # Set Page Config
@@ -24,32 +25,60 @@ def kategorikan_harga(h):
     elif h <= 100000: return 'Mahal (50-100rb)'
     else: return 'Sangat Mahal (>100rb)'
 
-# --- LOAD DATA ---
-# --- LOAD DATA (REVISI SINKRONISASI 100% DENGAN COLAB) ---
+# --- LOAD DATA (DENGAN BYPASS SYSTEM PENGAMAN AUTOMATIC FILE DETECTOR) ---
 @st.cache_data
 def load_data():
-    # 1. BACA LANGSUNG DATASET REVISI FINAL YANG SUDAH BERSIH DARI COLAB
-    # Ini menjamin df_clean berisi baris data yang persis sama dengan memori di Colab
-    df_clean = pd.read_csv('data/dataset_ocr_clear_final.csv')
+    # Mengunci jalur folder absolut tempat file app.py berada
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     
-    # 2. Baca file pendukung evaluasi model OCR lainnya
-    df_primer = pd.read_csv('data/Dataset_Terstruktur_Primer_NOPI.csv')
-    df_evaluasi = pd.read_csv('data/evaluasi_3_model.csv')
-    df_detail = pd.read_csv('data/detail_akurasi_semua_model.csv')
+    # Jalur file pembacaan tabel evaluasi global
+    path_primer = os.path.join(BASE_DIR, 'data', 'Dataset_Terstruktur_Primer_NOPI.csv')
+    path_evaluasi = os.path.join(BASE_DIR, 'data', 'evaluasi_3_model.csv')
+    path_detail = os.path.join(BASE_DIR, 'data', 'detail_akurasi_semua_model.csv')
+    path_clean = os.path.join(BASE_DIR, 'data', 'dataset_ocr_clear_final.csv')
+    path_all = os.path.join(BASE_DIR, 'data', 'all_images_metadata.csv')
 
-    # Pre-cleaning sederhana untuk dashboard
-    df_clean = df_primer.dropna(subset=['nama_barang', 'harga_satuan']).copy()
-    df_clean['nama_barang'] = df_clean['nama_barang'].apply(clean_nama_barang)
-    df_clean = df_clean[df_clean['harga_satuan'] >= 500]
-    df_clean['kategori_harga'] = df_clean['harga_satuan'].apply(kategorikan_harga)
+    # Fallback jika folder 'data/' diletakkan di root folder tanpa sub-direktori
+    if not os.path.exists(path_primer):
+        path_primer = 'Dataset_Terstruktur_Primer_NOPI.csv'
+        path_evaluasi = 'evaluasi_3_model.csv'
+        path_detail = 'detail_akurasi_semua_model.csv'
+        path_clean = 'dataset_ocr_clear_final.csv'
+        path_all = 'all_images_metadata.csv'
 
-    # Load dataset gabungan untuk kebutuhan EDA Citra Gambar & CNN
-    
-    # 3. Load dataset gabungan untuk kebutuhan metadata gambar
+    # Memuat berkas csv pendukung
+    df_primer = pd.read_csv(path_primer)
+    df_evaluasi = pd.read_csv(path_evaluasi)
+    df_detail = pd.read_csv(path_detail)
+
+    # BLOCK UTAMA FIX ERROR: Deteksi berkas bersih final hasil Colab
+    if os.path.exists(path_clean):
+        # Jika file csv hasil ekspor colab tersedia, baca langsung agar 100% identik
+        df_clean = pd.read_csv(path_clean, encoding='utf-8', errors='ignore')
+    else:
+        # PENGAMAN (FALLBACK): Jika file belum dipindah ke folder data, replikasikan 
+        # seluruh kriteria pembatasan logika data wrangling Colab agar grafiknya tetap sinkron
+        df_clean = df_primer.dropna(subset=['nama_barang', 'harga_satuan']).copy()
+        df_clean['nama_barang'] = df_clean['nama_barang'].apply(clean_nama_barang)
+        
+        # Eliminasi Baris Inkonsistensi & Noise Outlier QTY > 200 unit sesuai catatan notebook
+        if 'jumlah_barang' in df_clean.columns:
+            df_clean = df_clean[df_clean['jumlah_barang'] <= 200]
+            
+        # Batasan Harga Satuan Ekstrem (Meredam residual noise OCR menggunakan truncating nilai)
+        df_clean = df_clean[df_clean['harga_satuan'] >= 500]
+        
+        # Penerapan persentil pemotongan batas atas harga jika dibutuhkan
+        p99_harga = df_clean['harga_satuan'].quantile(0.99)
+        df_clean = df_clean[df_clean['harga_satuan'] <= p99_harga]
+        
+        # Rekonstruksi Fitur Kolom Kategori
+        df_clean['kategori_harga'] = df_clean['harga_satuan'].apply(kategorikan_harga)
+
+    # Memuat berkas metadata gambar pendukung halaman EDA
     try:
-        df_all = pd.read_csv('data/all_images_metadata.csv')
+        df_all = pd.read_csv(path_all)
     except:
-        # Jika file CSV ringkasan citra belum terbentuk, buat simulasi dataframe agar grafik EDA tidak crash
         np.random.seed(42)
         n_samples = 2117
         labels = ['struk'] * 1058 + ['non_struk'] * 1059
@@ -57,31 +86,25 @@ def load_data():
         heights = np.random.normal(1800, 600, n_samples).clip(600, 9000)
         sources = np.random.choice(['Kamera_HP', 'Unduhan_WA', 'Scan_Flatbed'], n_samples)
         df_all = pd.DataFrame({
-            'label': labels,
-            'width': widths,
-            'height': heights,
-            'source': sources,
-            'aspect_ratio': heights / widths
+            'label': labels, 'width': widths, 'height': heights, 
+            'source': sources, 'aspect_ratio': heights / widths
         })
 
-    # FIX ERROR KeyError: Pastikan df_all juga memiliki kolom kategori_harga jika ada kolom harga_satuan di dalamnya
-    # Pastikan df_all memiliki kolom kategori_harga agar tidak memicu KeyError
     if 'harga_satuan' in df_all.columns:
         df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
     else:
-        # Jika df_all murni hanya metadata citra (lebar/tinggi), buat kolom kategori_harga tiruan agar menu di bawah tidak crash
-        df_all['kategori_harga'] = np.random.choice(
-            ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)', 'Mahal (50-100rb)'], 
-            size=len(df_all)
-        )
+        if 'kategori_harga' not in df_all.columns:
+            df_all['kategori_harga'] = np.random.choice(
+                ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)', 'Mahal (50-100rb)'], 
+                size=len(df_all)
+            )
 
-    # Kembalikan dataframe yang sudah sinkron murni
     return df_primer, df_evaluasi, df_detail, df_clean, df_all
 
 try:
     df_primer, df_evaluasi, df_detail, df_clean, df_all = load_data()
 except Exception as e:
-    st.error(f"Gagal memuat file CSV. Pastikan file tersedia. Error: {e}")
+    st.error(f"Gagal memuat file CSV. Pastikan file diletakkan sejajar atau di folder 'data/'. Error: {e}")
     st.stop()
 
 # --- SIDEBAR NAVIGASI ---
@@ -110,7 +133,6 @@ if menu == "Home":
     2. Mendemonstrasikan transparansi perhitungan laba.
     3. Menyajikan data transaksi yang terstruktur.
     """)
-
 
 # --- 1. HALAMAN RINGKASAN & EDA ---
 elif menu == "Ringkasan & EDA":
@@ -157,13 +179,10 @@ elif menu == "Ringkasan & EDA":
         "yang sangat baik untuk menghindari bias pada model klasifikasi."
     )
 
-
-
 # --- BQ1: PERFORMA OCR ---
 elif menu == "BQ1: Performa OCR":
     st.header("🔍 BQ1: Bagaimana performa teknologi OCR dalam mengekstrak informasi?")
 
-    # Menampilkan Tabel Utama Komparasi
     col1, col2 = st.columns([3, 2])
     with col1:
         st.subheader("Tabel Komparasi Performa Model OCR")
@@ -177,7 +196,6 @@ elif menu == "BQ1: Performa OCR":
 
     st.divider()
 
-    # 1. VISUALISASI GRID BAR CHART (2x2)
     st.subheader("📊 Komparasi Performa 3 Model OCR (Grid Metrics)")
 
     models = df_evaluasi['Nama Model']
@@ -212,7 +230,6 @@ elif menu == "BQ1: Performa OCR":
 
     st.divider()
 
-    # 2. VISUALISASI PIE CHART DISTRIBUSI STATUS PARSING
     st.subheader("🍕 Distribusi Status Parsing per Model OCR")
 
     status_counts = df_detail.groupby(['Model', 'Status']).size().unstack(fill_value=0)
@@ -251,7 +268,6 @@ elif menu == "BQ1: Performa OCR":
 
     st.divider()
 
-    # 3. BAGIAN INSIGHT RESMI BQ1
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 1")
     st.markdown("""
     Berdasarkan hasil evaluasi pembuktian di atas, **Paddle memiliki performa paling seimbang** dibandingkan Tesseract dan EasyOCR. 
@@ -267,14 +283,9 @@ elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
     st.markdown("Sistem menampilkan perkiraan laba berdasarkan data terstruktur hasil ekstraksi OCR yang telah melalui proses *cleaning* akhir.")
 
-    # 1. PENGATURAN DEMO STRUK (Mengunci pada primer_0079.jpg sesuai notebook)
     sample_file = 'primer_0079.jpg'
-
-    # Filter data menggunakan df_clean (yang berisi dataset_ocr_clear_final.csv)
     sample_struk = df_clean[df_clean['filename'] == sample_file].copy()
 
-    # Memastikan kolom laba tersedia. Jika di dataset namanya 'laba_total' pakai itu, 
-    # jika belum ada, sistem akan membuatkannya otomatis dengan margin 20%
     if 'laba_total' not in sample_struk.columns:
         if 'estimasi_laba_20' in sample_struk.columns:
             sample_struk['laba_total'] = sample_struk['estimasi_laba_20']
@@ -283,8 +294,6 @@ elif menu == "BQ2: Estimasi Laba":
 
     st.subheader(f"📊 Demo Hasil Perhitungan Laba (Struk: {sample_file})")
 
-    # 2. TAMPILKAN TABEL DEMO STRUK (Replikasi fungsi display dari Notebook)
-    # Menyesuaikan kolom yang akan ditampilkan agar informatif bagi user/dosen
     kolom_tampilan = ['nama_toko', 'tanggal', 'nama_barang', 'jumlah_barang', 'harga_satuan', 'total_harga_item', 'laba_total']
     kolom_tersedia = [col for col in kolom_tampilan if col in sample_struk.columns]
 
@@ -293,7 +302,6 @@ elif menu == "BQ2: Estimasi Laba":
 
     st.divider()
 
-    # 3. VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart)
     st.write("### Visualisasi Top 15 Komoditas Berdasarkan Estimasi Laba")
 
     df_plot = (
@@ -305,7 +313,6 @@ elif menu == "BQ2: Estimasi Laba":
     if not df_plot.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
 
-        # Casting ke string untuk nama_barang agar rendering teks matplotlib aman di web
         bars = ax.barh(
             [str(x) for x in df_plot['nama_barang']], 
             df_plot['laba_total'].tolist(),
@@ -319,13 +326,12 @@ elif menu == "BQ2: Estimasi Laba":
         ax.set_xlabel('Estimasi Laba Total (Rp)')
 
         plt.tight_layout()
-        st.pyplot(fig) # Render grafik ke halaman web Streamlit
+        st.pyplot(fig)
     else:
         st.warning(f"Tidak ada data transaksi valid pada file {sample_file} untuk divisualisasikan.")
 
     st.divider()
 
-    # --- INSIGHT RESMI BISNIS DARI NOTEBOOK ---
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 2")
     st.markdown("""
     Dengan input persentase margin dari pengguna, sistem dapat langsung menghitung estimasi laba per item tanpa perlu memasukkan harga beli satu per satu. Berdasarkan demo struk `primer_0079.jpg` dengan margin 20%, total omzet struk sebesar **Rp 67.100** menghasilkan estimasi laba **Rp 13.420**.
@@ -335,7 +341,6 @@ elif menu == "BQ2: Estimasi Laba":
     Pendekatan ini praktis untuk pelaku UMKM yang tidak memiliki sistem pencatatan harga beli terstruktur — cukup input satu angka margin, sistem langsung menghasilkan laporan laba per item yang siap digunakan untuk pembukuan sederhana.
     """)
 
-
 # --- BQ3: LAPORAN TRANSAKSI ---
 elif menu == "BQ3: Laporan Transaksi":
     st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur untuk mendukung pengambilan keputusan bisnis?")
@@ -343,15 +348,10 @@ elif menu == "BQ3: Laporan Transaksi":
     
     import matplotlib.ticker as mticker
 
-    # ==========================================
-    # LOGIKA AGREGASI DATA (SINKRONISASI MURNI DARI DATASET CLEAR)
-    # ==========================================
-    # Menghitung estimasi laba jika belum ada kolomnya di dataset_ocr_clear_final
     if 'estimasi_laba_20' not in df_clean.columns:
         df_clean['estimasi_laba_20'] = df_clean['total_harga_item'] * 0.20
 
-    # Ambil pengelompokan agregasi per berkas nota/struk langsung dari data bersih
-    laporan_struk_filtered = df_clean.groupby('filename').agg(
+    laporan_struk = df_clean.groupby('filename').agg(
         nama_toko=('nama_toko', 'first'),
         tanggal_clean=('tanggal_clean', 'first') if 'tanggal_clean' in df_clean.columns else ('tanggal', 'first'),
         jumlah_item=('nama_barang', 'count'),
@@ -360,16 +360,29 @@ elif menu == "BQ3: Laporan Transaksi":
         estimasi_laba=('estimasi_laba_20', 'sum')
     ).reset_index()
 
-    # ==========================================
-    # VISUALISASI GRID GRAFIK PERILAKU PASAR
-    # ==========================================
+    # Kriteria eliminasi data noise & outliers pasca agregasi
+    laporan_struk_filtered = laporan_struk[
+        (laporan_struk['total_transaksi'] <= 500000) &
+        (laporan_struk['total_qty'] <= 50) &
+        (laporan_struk['nama_toko'].str.len() >= 5) &
+        (laporan_struk['nama_toko'].str.contains(r'[A-Za-z]{5,}', regex=True, na=False)) &
+        (~laporan_struk['nama_toko'].str.contains(
+            r'Penjualan|Distribus|\d{8,}|^Shop$|^Tong$|^Trre$|Deeok|Distrab|Duplikat|Ptoomfa|Mamy Poko|Opnstd|Apaaja|Yangaku|Higuna|Wiguna',
+            case=False, regex=True, na=False
+        ))
+    ].copy()
+
+    # Sinkronisasi visualisasi item agar memotong row outliers toko noise
+    valid_filenames = laporan_struk_filtered['filename'].unique()
+    df_clean_valid = df_clean[df_clean['filename'].isin(valid_filenames)].copy()
+
     st.subheader("📈 Analisis Kecenderungan Pasar dan Audit Finansial")
     
     col_chartA, col_chartB = st.columns(2)
     
     with col_chartA:
         st.markdown("**A. Distribusi Komponen Data Transaksi**")
-        df_harga = df_clean[df_clean['harga_satuan'] > 0]
+        df_harga = df_clean_valid[df_clean_valid['harga_satuan'] > 0]
         median_harga = df_harga['harga_satuan'].median()
 
         fig, axes = plt.subplots(1, 2, figsize=(14, 5))
@@ -396,7 +409,7 @@ elif menu == "BQ3: Laporan Transaksi":
         axes[0].legend()
 
         # Chart 2: Distribusi jumlah barang (QTY)
-        jumlah_counts = df_clean['jumlah_barang'].value_counts().sort_index().head(10)
+        jumlah_counts = df_clean_valid['jumlah_barang'].value_counts().sort_index().head(10)
         bars1 = axes[1].bar(
             jumlah_counts.index.astype(str),
             jumlah_counts.values,
@@ -422,9 +435,7 @@ elif menu == "BQ3: Laporan Transaksi":
             'Mahal (50-100rb)',
             'Sangat Mahal (>100rb)'
         ]
-        
-        # Mengambil counts kolom kategori_harga langsung dari dataset_ocr_clear_final
-        kat_counts = df_clean['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
+        kat_counts = df_clean_valid['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
 
         fig2, ax2 = plt.subplots(figsize=(8, 5))
         colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
@@ -443,10 +454,8 @@ elif menu == "BQ3: Laporan Transaksi":
         plt.tight_layout()
         st.pyplot(fig2)
 
-    # Baris baru untuk meninjau audit 10 Struk Teratas
     st.markdown("**C. Pengeluaran Teratas Berdasarkan Berkas Struk Nota Belanja Valid**")
     
-    # Ambil top 10 struk nominal terbesar dari data agregasi yang sudah bersih
     top_struk = (
         laporan_struk_filtered
         .sort_values('total_transaksi', ascending=False)
@@ -474,11 +483,8 @@ elif menu == "BQ3: Laporan Transaksi":
 
     st.divider()
 
-    # ==========================================
-    # LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
-    # ==========================================
     with st.expander("📂 Lihat Lembar Dokumen Transaksi Terstruktur (Database Hasil Agregasi OCR Final)"):
-        st.write("Daftar 10 baris teratas nota belanja hasil pembacaan database terstruktur bersih dari Colab:")
+        st.write("Daftar 10 baris teratas nota belanja hasil pembacaan database terstruktur bersih:")
         
         kolom_tabel = ['filename', 'nama_toko', 'tanggal_clean', 'jumlah_item', 'total_qty', 'total_transaksi', 'estimasi_laba']
         kolom_tabel_ada = [c for c in kolom_tabel if c in laporan_struk_filtered.columns]
@@ -490,9 +496,6 @@ elif menu == "BQ3: Laporan Transaksi":
 
     st.divider()
 
-    # ==========================================
-    # INSIGHT RESMI BISNIS
-    # ==========================================
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 3")
     st.markdown("""
     Data transaksi hasil OCR berhasil diolah menjadi laporan terstruktur setelah melalui proses *cleaning* dan *feature engineering*.
@@ -505,7 +508,7 @@ elif menu == "BQ3: Laporan Transaksi":
 
     > **Catatan Teknis Penulisan:** Beberapa nama toko dan nilai total transaksi masih mengandung *noise* OCR residual. Normalisasi nama toko lebih lanjut dapat dilakukan menggunakan teknik *fuzzy matching* pada tahap pengembangan berikutnya.
     """)
-    
+
 # Footer Global
 st.divider()
 st.caption("Copyright © 2026 | Proyek NOPI AI Analysis Dashboard")
