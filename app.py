@@ -24,29 +24,19 @@ def kategorikan_harga(h):
     elif h <= 100000: return 'Mahal (50-100rb)'
     else: return 'Sangat Mahal (>100rb)'
 
-# --- LOAD DATA (REVISI SUPAYA SAMA 100% DENGAN COLAB) ---
+# --- LOAD DATA ---
 @st.cache_data
 def load_data():
-    # Pastikan file 'dataset_ocr_clear_final.csv' diletakkan di dalam folder data/
-    # File ini adalah hasil export .to_csv() terakhir dari Google Colab kamu
-    df_clean = pd.read_csv('data/dataset_ocr_clear_final.csv')
-    
-    # df_primer tetap dibaca jika dibutuhkan untuk menu lain
     df_primer = pd.read_csv('data/Dataset_Terstruktur_Primer_NOPI.csv')
     df_evaluasi = pd.read_csv('data/evaluasi_3_model.csv')
     df_detail = pd.read_csv('data/detail_akurasi_semua_model.csv')
-    
-    # PENTING: Jangan lakukan filter manual lagi seperti dropna atau >= 500 jika 
-    # dataset_ocr_clear_final sudah dalam kondisi matang/bersih dari Colab.
-    
-    return df_primer, df_evaluasi, df_detail, df_clean
-    
+
     # Pre-cleaning sederhana untuk dashboard
     df_clean = df_primer.dropna(subset=['nama_barang', 'harga_satuan']).copy()
     df_clean['nama_barang'] = df_clean['nama_barang'].apply(clean_nama_barang)
     df_clean = df_clean[df_clean['harga_satuan'] >= 500]
     df_clean['kategori_harga'] = df_clean['harga_satuan'].apply(kategorikan_harga)
-    
+
     # Load dataset gabungan untuk kebutuhan EDA Citra Gambar & CNN
     try:
         df_all = pd.read_csv('data/all_images_metadata.csv')
@@ -65,7 +55,7 @@ def load_data():
             'source': sources,
             'aspect_ratio': heights / widths
         })
-    
+
     # FIX ERROR KeyError: Pastikan df_all juga memiliki kolom kategori_harga jika ada kolom harga_satuan di dalamnya
     if 'harga_satuan' in df_all.columns:
         df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
@@ -75,7 +65,7 @@ def load_data():
             ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)', 'Mahal (50-100rb)'], 
             size=len(df_all)
         )
-    
+
     return df_primer, df_evaluasi, df_detail, df_clean, df_all
 
 try:
@@ -110,7 +100,7 @@ if menu == "Home":
     2. Mendemonstrasikan transparansi perhitungan laba.
     3. Menyajikan data transaksi yang terstruktur.
     """)
-    
+
 
 # --- 1. HALAMAN RINGKASAN & EDA ---
 elif menu == "Ringkasan & EDA":
@@ -162,13 +152,13 @@ elif menu == "Ringkasan & EDA":
 # --- BQ1: PERFORMA OCR ---
 elif menu == "BQ1: Performa OCR":
     st.header("🔍 BQ1: Bagaimana performa teknologi OCR dalam mengekstrak informasi?")
-    
+
     # Menampilkan Tabel Utama Komparasi
     col1, col2 = st.columns([3, 2])
     with col1:
         st.subheader("Tabel Komparasi Performa Model OCR")
         st.dataframe(df_evaluasi, use_container_width=True)
-    
+
     with col2:
         st.subheader("Rekomendasi Utama")
         st.success("""
@@ -176,10 +166,10 @@ elif menu == "BQ1: Performa OCR":
         """)
 
     st.divider()
-    
+
     # 1. VISUALISASI GRID BAR CHART (2x2)
     st.subheader("📊 Komparasi Performa 3 Model OCR (Grid Metrics)")
-    
+
     models = df_evaluasi['Nama Model']
     colors_bar = ['steelblue', 'tomato', 'mediumseagreen']
 
@@ -214,9 +204,9 @@ elif menu == "BQ1: Performa OCR":
 
     # 2. VISUALISASI PIE CHART DISTRIBUSI STATUS PARSING
     st.subheader("🍕 Distribusi Status Parsing per Model OCR")
-    
+
     status_counts = df_detail.groupby(['Model', 'Status']).size().unstack(fill_value=0)
-    
+
     label_map = {
         'Sebagian (Terekstrak tapi ada miss)': 'Sebagian',
         'Sempurna (100%)': 'Sempurna',
@@ -232,7 +222,7 @@ elif menu == "BQ1: Performa OCR":
         if model in status_counts.index:
             data = status_counts.loc[model]
             current_colors = colors_status[:len(data)]
-            
+
             ax.pie(
                 data.values,
                 labels=data.index,
@@ -266,13 +256,13 @@ elif menu == "BQ1: Performa OCR":
 elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
     st.markdown("Sistem menampilkan perkiraan laba berdasarkan data terstruktur hasil ekstraksi OCR yang telah melalui proses *cleaning* akhir.")
-    
+
     # 1. PENGATURAN DEMO STRUK (Mengunci pada primer_0079.jpg sesuai notebook)
     sample_file = 'primer_0079.jpg'
-    
+
     # Filter data menggunakan df_clean (yang berisi dataset_ocr_clear_final.csv)
     sample_struk = df_clean[df_clean['filename'] == sample_file].copy()
-    
+
     # Memastikan kolom laba tersedia. Jika di dataset namanya 'laba_total' pakai itu, 
     # jika belum ada, sistem akan membuatkannya otomatis dengan margin 20%
     if 'laba_total' not in sample_struk.columns:
@@ -282,29 +272,29 @@ elif menu == "BQ2: Estimasi Laba":
             sample_struk['laba_total'] = sample_struk['total_harga_item'] * 0.20
 
     st.subheader(f"📊 Demo Hasil Perhitungan Laba (Struk: {sample_file})")
-    
+
     # 2. TAMPILKAN TABEL DEMO STRUK (Replikasi fungsi display dari Notebook)
     # Menyesuaikan kolom yang akan ditampilkan agar informatif bagi user/dosen
     kolom_tampilan = ['nama_toko', 'tanggal', 'nama_barang', 'jumlah_barang', 'harga_satuan', 'total_harga_item', 'laba_total']
     kolom_tersedia = [col for col in kolom_tampilan if col in sample_struk.columns]
-    
+
     st.write("Tabel representasi data terstruktur transaksional item pada demo struk (Dataset Bersih Final):")
     st.dataframe(sample_struk[kolom_tersedia], use_container_width=True)
-    
+
     st.divider()
-    
+
     # 3. VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart)
     st.write("### Visualisasi Top 15 Komoditas Berdasarkan Estimasi Laba")
-    
+
     df_plot = (
         sample_struk[sample_struk['laba_total'] > 0]
         .sort_values('laba_total')
         .tail(15)
     ).copy()
-    
+
     if not df_plot.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
-        
+
         # Casting ke string untuk nama_barang agar rendering teks matplotlib aman di web
         bars = ax.barh(
             [str(x) for x in df_plot['nama_barang']], 
@@ -313,11 +303,11 @@ elif menu == "BQ2: Estimasi Laba":
             alpha=0.85,
             edgecolor='white'
         )
-        
+
         ax.bar_label(bars, fmt='Rp %.0f', padding=3, fontsize=9)
         ax.set_title('BQ2 — Estimasi Laba per Item (Margin 20%)', fontweight='bold')
         ax.set_xlabel('Estimasi Laba Total (Rp)')
-        
+
         plt.tight_layout()
         st.pyplot(fig) # Render grafik ke halaman web Streamlit
     else:
@@ -334,12 +324,12 @@ elif menu == "BQ2: Estimasi Laba":
 
     Pendekatan ini praktis untuk pelaku UMKM yang tidak memiliki sistem pencatatan harga beli terstruktur — cukup input satu angka margin, sistem langsung menghasilkan laporan laba per item yang siap digunakan untuk pembukuan sederhana.
     """)
-    
+
 # --- BQ3: LAPORAN TRANSAKSI ---
 elif menu == "BQ3: Laporan Transaksi":
     st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur untuk mendukung pengambilan keputusan bisnis?")
     st.markdown("Mentransformasikan hasil ekstraksi teks acak dokumen nota belanja menjadi laporan finansial terstruktur untuk menunjang strategi bisnis UMKM.")
-    
+
     import matplotlib.ticker as mticker
 
     # ==========================================
@@ -352,12 +342,14 @@ elif menu == "BQ3: Laporan Transaksi":
     laporan_struk = df_clean.groupby('filename').agg(
         nama_toko=('nama_toko', 'first'),
         tanggal_clean=('tanggal_clean', 'first') if 'tanggal_clean' in df_clean.columns else ('tanggal', 'first'),
+        tanggal_valid=('tanggal_valid', 'first') if 'tanggal_valid' in df_clean.columns else ('harga_satuan', 'any'),
         jumlah_item=('nama_barang', 'count'),
         total_qty=('jumlah_barang', 'sum'),
         total_transaksi=('total_harga_item', 'sum'),
         estimasi_laba=('estimasi_laba_20', 'sum')
     ).reset_index().sort_values('total_transaksi', ascending=False)
 
+    # 3. Terapan Kriteria Filter Pembersihan Data Outlier & Noise OCR Persis Notebook
     # 3. Terapan Kriteria Filter Pembersihan Data Outlier & Noise OCR Persis Notebook Colab
     # Menghapus filter 'tanggal_valid' yang merusak data di Streamlit agar output kembali sama 100%
     laporan_struk_filtered = laporan_struk[
@@ -372,17 +364,20 @@ elif menu == "BQ3: Laporan Transaksi":
     ].copy()
 
     # ==========================================
+    # TINGKAT 1: VISUALISASI GRID GRAFIK PERILAKU PASAR
     # VISUALISASI GRID GRAFIK PERILAKU PASAR
     # ==========================================
     st.subheader("📈 Analisis Kecenderungan Pasar dan Audit Finansial")
-    
+
+    # Grid Kiri & Kanan berdampingan untuk menghemat layout halaman
     col_chartA, col_chartB = st.columns(2)
-    
+
     with col_chartA:
         st.markdown("**A. Distribusi Komponen Data Transaksi**")
         df_harga = df_clean[df_clean['harga_satuan'] > 0]
         median_harga = df_harga['harga_satuan'].median()
 
+        fig, axes = plt.subplots(1, 2, figsize=(14, 6))
         fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
         # Chart 1: Distribusi harga satuan
@@ -435,6 +430,7 @@ elif menu == "BQ3: Laporan Transaksi":
         ]
         kat_counts = df_clean['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
 
+        fig2, ax2 = plt.subplots(figsize=(10, 6))
         fig2, ax2 = plt.subplots(figsize=(8, 5))
         colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
 
@@ -446,12 +442,14 @@ elif menu == "BQ3: Laporan Transaksi":
             edgecolor='white'
         )
         ax2.bar_label(bars2, padding=3, fontsize=10)
+        ax2.set_title('Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
         ax2.set_title('BQ3 — Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
         ax2.set_xlabel('Jumlah Item')
-        
+
         plt.tight_layout()
         st.pyplot(fig2)
 
+    # Baris baru melebar ke bawah untuk meninjau audit 10 Struk Teratas
     # Baris baru untuk meninjau audit 10 Struk Teratas
     st.markdown("**C. Pengeluaran Teratas Berdasarkan Berkas Struk Nota Belanja Valid**")
     
@@ -463,6 +461,7 @@ elif menu == "BQ3: Laporan Transaksi":
     )
 
     if not top_struk.empty:
+        fig3, ax3 = plt.subplots(figsize=(12, 4))
         fig3, ax3 = plt.subplots(figsize=(10, 5))
         bars3 = ax3.barh(
             top_struk['filename'],
@@ -472,9 +471,10 @@ elif menu == "BQ3: Laporan Transaksi":
             edgecolor='white'
         )
         ax3.bar_label(bars3, fmt='Rp %.0f', padding=3, fontsize=9)
+        ax3.set_title('Struk Teratas berdasarkan Total Transaksi Valid (Hasil Filter Seleksi)', fontweight='bold')
         ax3.set_title('BQ3 — Struk Teratas berdasarkan Total Transaksi Valid', fontweight='bold')
         ax3.set_xlabel('Total Transaksi (Rp)')
-        
+
         plt.tight_layout()
         st.pyplot(fig3)
     else:
@@ -483,6 +483,7 @@ elif menu == "BQ3: Laporan Transaksi":
     st.divider()
 
     # ==========================================
+    # TINGKAT 2: LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
     # LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
     # ==========================================
     with st.expander("📂 Lihat Lembar Dokumen Transaksi Terstruktur (Database Hasil Agregasi OCR Final)"):
@@ -495,6 +496,7 @@ elif menu == "BQ3: Laporan Transaksi":
     st.divider()
 
     # ==========================================
+    # TINGKAT 3: INSIGHT RESMI BISNIS DARI NOTEBOOK
     # INSIGHT RESMI BISNIS DARI NOTEBOOK
     # ==========================================
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 3")
