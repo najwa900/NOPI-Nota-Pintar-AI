@@ -342,14 +342,14 @@ elif menu == "BQ3: Laporan Transaksi":
     laporan_struk = df_clean.groupby('filename').agg(
         nama_toko=('nama_toko', 'first'),
         tanggal_clean=('tanggal_clean', 'first') if 'tanggal_clean' in df_clean.columns else ('tanggal', 'first'),
-        tanggal_valid=('tanggal_valid', 'first') if 'tanggal_valid' in df_clean.columns else ('harga_satuan', 'any'),
         jumlah_item=('nama_barang', 'count'),
         total_qty=('jumlah_barang', 'sum'),
         total_transaksi=('total_harga_item', 'sum'),
         estimasi_laba=('estimasi_laba_20', 'sum')
     ).reset_index().sort_values('total_transaksi', ascending=False)
 
-    # 3. Terapan Kriteria Filter Pembersihan Data Outlier & Noise OCR Persis Notebook
+    # 3. Terapan Kriteria Filter Pembersihan Data Outlier & Noise OCR Persis Notebook Colab
+    # Menghapus filter 'tanggal_valid' yang merusak data di Streamlit agar output kembali sama 100%
     laporan_struk_filtered = laporan_struk[
         (laporan_struk['total_transaksi'] <= 500000) &
         (laporan_struk['total_qty'] <= 50) &
@@ -362,11 +362,10 @@ elif menu == "BQ3: Laporan Transaksi":
     ].copy()
 
     # ==========================================
-    # TINGKAT 1: VISUALISASI GRID GRAFIK PERILAKU PASAR
+    # VISUALISASI GRID GRAFIK PERILAKU PASAR
     # ==========================================
     st.subheader("📈 Analisis Kecenderungan Pasar dan Audit Finansial")
     
-    # Grid Kiri & Kanan berdampingan untuk menghemat layout halaman
     col_chartA, col_chartB = st.columns(2)
     
     with col_chartA:
@@ -374,7 +373,7 @@ elif menu == "BQ3: Laporan Transaksi":
         df_harga = df_clean[df_clean['harga_satuan'] > 0]
         median_harga = df_harga['harga_satuan'].median()
 
-        fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
         # Chart 1: Distribusi harga satuan
         axes[0].hist(
@@ -411,6 +410,7 @@ elif menu == "BQ3: Laporan Transaksi":
         axes[1].set_xlabel('Jumlah Barang')
         axes[1].set_ylabel('Frekuensi')
 
+        plt.suptitle('BQ3 — Distribusi Data Transaksi', fontsize=14, fontweight='bold')
         plt.tight_layout()
         st.pyplot(fig)
 
@@ -425,7 +425,7 @@ elif menu == "BQ3: Laporan Transaksi":
         ]
         kat_counts = df_clean['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
 
-        fig2, ax2 = plt.subplots(figsize=(10, 6))
+        fig2, ax2 = plt.subplots(figsize=(8, 5))
         colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
 
         bars2 = ax2.barh(
@@ -436,14 +436,15 @@ elif menu == "BQ3: Laporan Transaksi":
             edgecolor='white'
         )
         ax2.bar_label(bars2, padding=3, fontsize=10)
-        ax2.set_title('Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
+        ax2.set_title('BQ3 — Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
         ax2.set_xlabel('Jumlah Item')
         
         plt.tight_layout()
         st.pyplot(fig2)
 
-    # Baris baru melebar ke bawah untuk meninjau audit 10 Struk Teratas
+    # Baris baru untuk meninjau audit 10 Struk Teratas
     st.markdown("**C. Pengeluaran Teratas Berdasarkan Berkas Struk Nota Belanja Valid**")
+    
     top_struk = (
         laporan_struk_filtered
         .sort_values('total_transaksi', ascending=False)
@@ -452,7 +453,7 @@ elif menu == "BQ3: Laporan Transaksi":
     )
 
     if not top_struk.empty:
-        fig3, ax3 = plt.subplots(figsize=(12, 4))
+        fig3, ax3 = plt.subplots(figsize=(10, 5))
         bars3 = ax3.barh(
             top_struk['filename'],
             top_struk['total_transaksi'],
@@ -461,7 +462,7 @@ elif menu == "BQ3: Laporan Transaksi":
             edgecolor='white'
         )
         ax3.bar_label(bars3, fmt='Rp %.0f', padding=3, fontsize=9)
-        ax3.set_title('Struk Teratas berdasarkan Total Transaksi Valid (Hasil Filter Seleksi)', fontweight='bold')
+        ax3.set_title('BQ3 — Struk Teratas berdasarkan Total Transaksi Valid', fontweight='bold')
         ax3.set_xlabel('Total Transaksi (Rp)')
         
         plt.tight_layout()
@@ -472,7 +473,7 @@ elif menu == "BQ3: Laporan Transaksi":
     st.divider()
 
     # ==========================================
-    # TINGKAT 2: LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
+    # LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
     # ==========================================
     with st.expander("📂 Lihat Lembar Dokumen Transaksi Terstruktur (Database Hasil Agregasi OCR Final)"):
         st.write("Daftar 10 baris teratas nota belanja hasil eliminasi pencilan (*outliers*) dan *residual noise text*:")
@@ -484,7 +485,7 @@ elif menu == "BQ3: Laporan Transaksi":
     st.divider()
 
     # ==========================================
-    # TINGKAT 3: INSIGHT RESMI BISNIS DARI NOTEBOOK
+    # INSIGHT RESMI BISNIS DARI NOTEBOOK
     # ==========================================
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 3")
     st.markdown("""
