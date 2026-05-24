@@ -281,7 +281,7 @@ elif menu == "BQ2: Estimasi Laba":
     st.divider()
     
     # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart)
-    st.write("### Visualisasi Top 15 Komoditas Berdasarkan Estimasi Laba")
+    st.write("### Visualisasi Estimasi Laba")
     
     df_plot = (
         sample_struk[sample_struk['laba_total'] > 0]
