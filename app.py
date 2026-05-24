@@ -303,105 +303,138 @@ elif menu == "BQ2: Estimasi Laba":
     """)
 
 # --- BQ3: LAPORAN TRANSAKSI ---
+# --- BQ3: LAPORAN TRANSAKSI ---
 elif menu == "BQ3: Laporan Transaksi":
     st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur untuk mendukung pengambilan keputusan bisnis?")
+    st.markdown("Mentransformasikan hasil ekstraksi teks acak dokumen nota belanja menjadi ringkasan eksekutif finansial bulanan untuk menunjang strategi bisnis UMKM.")
     
     import matplotlib.ticker as mticker
 
-    # 1. VISUALISASI GRID: DISTRIBUSI DATA TRANSAKSI
-    df_harga = df_clean[df_clean['harga_satuan'] > 0]
-    median_harga = df_harga['harga_satuan'].median()
+    # ==========================================
+    # LOGIKA PEMROSESAN DATA (SINKRONISASI 100% DENGAN COLAB)
+    # ==========================================
+    # 1. Tambahkan kolom kalkulasi laba 20%
+    df_clean['estimasi_laba_20'] = df_clean['total_harga_item'] * 0.20
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    # 2. Ambil pengelompokan agregasi per berkas nota/struk
+    laporan_struk = df_clean.groupby('filename').agg(
+        nama_toko=('nama_toko', 'first'),
+        tanggal_clean=('tanggal_clean', 'first') if 'tanggal_clean' in df_clean.columns else ('tanggal', 'first'),
+        tanggal_valid=('tanggal_valid', 'first') if 'tanggal_valid' in df_clean.columns else ('harga_satuan', 'any'),
+        jumlah_item=('nama_barang', 'count'),
+        total_qty=('jumlah_barang', 'sum'),
+        total_transaksi=('total_harga_item', 'sum'),
+        estimasi_laba=('estimasi_laba_20', 'sum')
+    ).reset_index().sort_values('total_transaksi', ascending=False)
 
-    # Chart 1: Distribusi harga satuan
-    axes[0].hist(
-        df_harga['harga_satuan'],
-        bins=30,
-        color='steelblue',
-        alpha=0.8,
-        edgecolor='white'
-    )
+    # 3. Terapan Kriteria Filter Pembersihan Data Outlier & Noise OCR Persis Notebook
+    laporan_struk_filtered = laporan_struk[
+        (laporan_struk['total_transaksi'] <= 500000) &
+        (laporan_struk['total_qty'] <= 50) &
+        (laporan_struk['nama_toko'].str.len() >= 5) &
+        (laporan_struk['nama_toko'].str.contains(r'[A-Za-z]{5,}', regex=True, na=False)) &
+        (~laporan_struk['nama_toko'].str.contains(
+            r'Penjualan|Distribus|\d{8,}|^Shop$|^Tong$|^Trre$|Deeok|Distrab|Duplikat|Ptoomfa|Mamy Poko|Opnstd|Apaaja|Yangaku|Higuna|Wiguna',
+            case=False, regex=True, na=False
+        ))
+    ].copy()
 
-    axes[0].axvline(
-        median_harga,
-        color='tomato',
-        linestyle='--',
-        linewidth=2,
-        label=f'Median: Rp {median_harga:,.0f}'
-    )
-
-    axes[0].set_title('Distribusi Harga Satuan Item', fontweight='bold')
-    axes[0].set_xlabel('Harga Satuan (Rp)')
-    axes[0].set_ylabel('Frekuensi')
-    axes[0].xaxis.set_major_formatter(
-        mticker.FuncFormatter(lambda x, _: f'{x/1000:.0f}rb')
-    )
-    axes[0].legend()
-
-    # Chart 2: Distribusi jumlah barang
-    jumlah_counts = df_clean['jumlah_barang'].value_counts().sort_index().head(10)
-
-    bars = axes[1].bar(
-        jumlah_counts.index.astype(str),
-        jumlah_counts.values,
-        color='mediumseagreen',
-        alpha=0.85,
-        edgecolor='white'
-    )
-
-    axes[1].bar_label(bars, padding=3)
-    axes[1].set_title('Distribusi Jumlah Barang per Baris Transaksi', fontweight='bold')
-    axes[1].set_xlabel('Jumlah Barang')
-    axes[1].set_ylabel('Frekuensi')
-
-    plt.suptitle('BQ3 — Distribusi Data Transaksi', fontsize=14, fontweight='bold')
-    plt.tight_layout()
-    st.pyplot(fig)
+    # ==========================================
+    # TINGKAT 1: KARTU METRIK RINGKASAN FINANSIAL UMKM
+    # ==========================================
+    st.subheader("📊 Indikator Performa Keuangan Toko (Key Performance Indicators)")
+    
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Total Item Terproses", f"{len(df_clean)} Item", help="Jumlah baris data komoditas unik yang terekstraksi")
+    m2.metric("Median Harga Satuan", f"Rp {df_clean['harga_satuan'].median():,.0f}", help="Nilai tengah patokan harga produk di pasar")
+    m3.metric("Total Akumulasi Transaksi", f"Rp {laporan_struk_filtered['total_transaksi'].sum():,.0f}", help="Total omzet bersih dari struk belanja valid")
+    m4.metric("Estimasi Profit Usaha (Margin 20%)", f"Rp {laporan_struk_filtered['estimasi_laba'].sum():,.0f}", help="Proyeksi keuntungan kotor UMKM")
 
     st.divider()
 
-    # 2. VISUALISASI SEGMENTASI KATEGORI HARGA
-    kat_order = [
-        'Sangat Murah (<=5rb)',
-        'Murah (5-20rb)',
-        'Sedang (20-50rb)',
-        'Mahal (50-100rb)',
-        'Sangat Mahal (>100rb)'
-    ]
-
-    kat_counts = df_clean['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
-
-    fig2, ax2 = plt.subplots(figsize=(8, 5))
-    colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
-
-    bars2 = ax2.barh(
-        kat_counts.index,
-        kat_counts.values,
-        color=colors_kat,
-        alpha=0.85,
-        edgecolor='white'
-    )
-
-    ax2.bar_label(bars2, padding=3, fontsize=10)
-    ax2.set_title('BQ3 — Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
-    ax2.set_xlabel('Jumlah Item')
-
-    plt.tight_layout()
-    st.pyplot(fig2)
-
-    st.divider()
-
-    # 3. VISUALISASI TOP STRUK BERDASARKAN TOTAL TRANSAKSI
-    group_col = 'filename' if 'filename' in df_clean.columns else 'nama_toko'
+    # ==========================================
+    # TINGKAT 2: VISUALISASI GRID GRAFIK PERILAKU PASAR
+    # ==========================================
+    st.subheader("📈 Analisis Kecenderungan Pasar dan Audit Finansial")
     
-    laporan_struk_filtered = df_clean.groupby(group_col).agg(
-        total_transaksi=('total_harga_item', 'sum')
-    ).reset_index()
+    # Grid Kiri & Kanan berdampingan untuk menghemat layout halaman
+    col_chartA, col_chartB = st.columns(2)
     
-    if group_col != 'filename':
-        laporan_struk_filtered = laporan_struk_filtered.rename(columns={group_col: 'filename'})
+    with col_chartA:
+        st.markdown("**A. Distribusi Komponen Data Transaksi**")
+        df_harga = df_clean[df_clean['harga_satuan'] > 0]
+        median_harga = df_harga['harga_satuan'].median()
 
+        fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
+        # Chart 1: Distribusi harga satuan
+        axes[0].hist(
+            df_harga['harga_satuan'],
+            bins=30,
+            color='steelblue',
+            alpha=0.8,
+            edgecolor='white'
+        )
+        axes[0].axvline(
+            median_harga,
+            color='tomato',
+            linestyle='--',
+            linewidth=2,
+            label=f'Median: Rp {median_harga:,.0f}'
+        )
+        axes[0].set_title('Distribusi Harga Satuan Item', fontweight='bold')
+        axes[0].set_xlabel('Harga Satuan (Rp)')
+        axes[0].set_ylabel('Frekuensi')
+        axes[0].xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f'{x/1000:.0f}rb'))
+        axes[0].legend()
+
+        # Chart 2: Distribusi jumlah barang
+        jumlah_counts = df_clean['jumlah_barang'].value_counts().sort_index().head(10)
+        bars1 = axes[1].bar(
+            jumlah_counts.index.astype(str),
+            jumlah_counts.values,
+            color='mediumseagreen',
+            alpha=0.85,
+            edgecolor='white'
+        )
+        axes[1].bar_label(bars1, padding=3)
+        axes[1].set_title('Distribusi Jumlah Barang per Baris Transaksi', fontweight='bold')
+        axes[1].set_xlabel('Jumlah Barang')
+        axes[1].set_ylabel('Frekuensi')
+
+        plt.tight_layout()
+        st.pyplot(fig)
+
+    with col_chartB:
+        st.markdown("**B. Segmentasi Item Berdasarkan Rentang Harga**")
+        kat_order = [
+            'Sangat Murah (<=5rb)',
+            'Murah (5-20rb)',
+            'Sedang (20-50rb)',
+            'Mahal (50-100rb)',
+            'Sangat Mahal (>100rb)'
+        ]
+        kat_counts = df_clean['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
+
+        fig2, ax2 = plt.subplots(figsize=(10, 6))
+        colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
+
+        bars2 = ax2.barh(
+            kat_counts.index,
+            kat_counts.values,
+            color=colors_kat,
+            alpha=0.85,
+            edgecolor='white'
+        )
+        ax2.bar_label(bars2, padding=3, fontsize=10)
+        ax2.set_title('Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
+        ax2.set_xlabel('Jumlah Item')
+        
+        plt.tight_layout()
+        st.pyplot(fig2)
+
+    # Baris baru melebar ke bawah untuk meninjau audit 10 Struk Teratas
+    st.markdown("**C. Pengeluaran Teratas Berdasarkan Berkas Struk Nota Belanja Valid**")
     top_struk = (
         laporan_struk_filtered
         .sort_values('total_transaksi', ascending=False)
@@ -409,37 +442,52 @@ elif menu == "BQ3: Laporan Transaksi":
         .sort_values('total_transaksi')
     )
 
-    fig3, ax3 = plt.subplots(figsize=(10, 5))
-
-    bars3 = ax3.barh(
-        top_struk['filename'],
-        top_struk['total_transaksi'],
-        color='mediumpurple',
-        alpha=0.85,
-        edgecolor='white'
-    )
-
-    ax3.bar_label(bars3, fmt='Rp %.0f', padding=3, fontsize=9)
-    ax3.set_title('BQ3 — Struk Teratas berdasarkan Total Transaksi Valid', fontweight='bold')
-    ax3.set_xlabel('Total Transaksi (Rp)')
-
-    plt.tight_layout()
-    st.pyplot(fig3)
+    if not top_struk.empty:
+        fig3, ax3 = plt.subplots(figsize=(12, 4))
+        bars3 = ax3.barh(
+            top_struk['filename'],
+            top_struk['total_transaksi'],
+            color='mediumpurple',
+            alpha=0.85,
+            edgecolor='white'
+        )
+        ax3.bar_label(bars3, fmt='Rp %.0f', padding=3, fontsize=9)
+        ax3.set_title('Struk Teratas berdasarkan Total Transaksi Valid (Hasil Filter Seleksi)', fontweight='bold')
+        ax3.set_xlabel('Total Transaksi (Rp)')
+        
+        plt.tight_layout()
+        st.pyplot(fig3)
+    else:
+        st.warning("Tidak ada data struk yang lolos kriteria filter seleksi untuk ditampilkan.")
 
     st.divider()
 
-    # 4. INSIGHT BQ3
+    # ==========================================
+    # TINGKAT 3: LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
+    # ==========================================
+    with st.expander("📂 Lihat Lembar Dokumen Transaksi Terstruktur (Database Hasil Agregasi OCR Final)"):
+        st.write("Daftar 10 baris teratas nota belanja hasil eliminasi pencilan (*outliers*) dan *residual noise text*:")
+        st.dataframe(
+            laporan_struk_filtered[['filename', 'nama_toko', 'tanggal_clean', 'jumlah_item', 'total_qty', 'total_transaksi', 'estimasi_laba']].head(10),
+            use_container_width=True
+        )
+
+    st.divider()
+
+    # ==========================================
+    # TINGKAT 4: INSIGHT RESMI BISNIS DARI NOTEBOOK
+    # ==========================================
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 3")
     st.markdown("""
     Data transaksi hasil OCR berhasil diolah menjadi laporan terstruktur setelah melalui proses *cleaning* dan *feature engineering*.
 
-    Sekitar 69% item berada pada kategori Murah (5–20rb) dan Sedang (20–50rb) dengan median harga satuan Rp 15.145, mencerminkan pola belanja kebutuhan sehari-hari. Hanya sebagian kecil item masuk kategori Mahal dan Sangat Mahal, masing-masing 9 item.
+    Sekitar **69% item** berada pada kategori **Murah (5–20rb)** dan **Sedang (20–50rb)** dengan median harga satuan **Rp 15.145**, mencerminkan pola belanja kebutuhan sehari-hari. Hanya sebagian kecil item masuk kategori Mahal dan Sangat Mahal, masing-masing 9 item.
 
-    Mayoritas transaksi bersifat satuan (1 unit per baris), bukan grosir. Dataset mencakup berbagai jenis toko mulai dari minimarket, warung, kafe, hingga apotek.
+    **Mayoritas transaksi bersifat satuan (1 unit per baris)**, bukan grosir. Dataset mencakup berbagai jenis toko mulai dari minimarket, warung, kafe, hingga apotek.
 
     Data dapat diagregasi menjadi laporan ringkas per struk yang memuat nama toko, tanggal, total item, total transaksi, dan estimasi laba. Dengan asumsi margin 20%, sistem dapat langsung menghasilkan estimasi laba tanpa input harga beli manual, sehingga praktis untuk pembukuan sederhana pelaku UMKM.
 
-    > **Catatan:** Beberapa nama toko dan nilai total transaksi masih mengandung *noise* OCR residual. Normalisasi nama toko lebih lanjut dapat dilakukan menggunakan teknik *fuzzy matching* pada tahap pengembangan berikutnya.
+    > **Catatan Teknis Penulisan:** Beberapa nama toko dan nilai total transaksi masih mengandung *noise* OCR residual. Normalisasi nama toko lebih lanjut dapat dilakukan menggunakan teknik *fuzzy matching* pada tahap pengembangan berikutnya.
     """)
 
 # Footer Global
