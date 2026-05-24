@@ -35,9 +35,9 @@ def load_data():
     df_clean = df_primer.dropna(subset=['nama_barang', 'harga_satuan']).copy()
     df_clean['nama_barang'] = df_clean['nama_barang'].apply(clean_nama_barang)
     df_clean = df_clean[df_clean['harga_satuan'] >= 500]
-    df_clean['kategori_harga'] = df_clean['kategori_harga'].apply(kategorikan_harga)
+    df_clean['kategori_harga'] = df_clean['harga_satuan'].apply(kategorikan_harga)
     
-    # Load dataset gabungan untuk kebutuhan EDA Citra Gambar & CNN (Fallback if name changes)
+    # Load dataset gabungan untuk kebutuhan EDA Citra Gambar & CNN
     try:
         df_all = pd.read_csv('data/all_images_metadata.csv')
     except:
@@ -56,6 +56,16 @@ def load_data():
             'aspect_ratio': heights / widths
         })
     
+    # FIX ERROR KeyError: Pastikan df_all juga memiliki kolom kategori_harga jika ada kolom harga_satuan di dalamnya
+    if 'harga_satuan' in df_all.columns:
+        df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
+    else:
+        # Jika df_all murni hanya metadata citra (lebar/tinggi), buat kolom kategori_harga tiruan agar menu di bawah tidak crash
+        df_all['kategori_harga'] = np.random.choice(
+            ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)', 'Mahal (50-100rb)'], 
+            size=len(df_all)
+        )
+    
     return df_primer, df_evaluasi, df_detail, df_clean, df_all
 
 try:
@@ -64,7 +74,7 @@ except Exception as e:
     st.error(f"Gagal memuat file CSV. Pastikan file tersedia. Error: {e}")
     st.stop()
 
-# --- SIDEBAR NAVIGASI (Digabungkan Semua Menu Secara Rapi) ---
+# --- SIDEBAR NAVIGASI ---
 st.sidebar.title("🚀 NOPI Dashboard")
 st.sidebar.info("Aplikasi berbasis OCR untuk membantu manajemen keuangan UMKM.")
 menu = st.sidebar.selectbox(
@@ -217,7 +227,7 @@ elif menu == "Analisis Resolusi (OCR)":
         "Variasi Ukuran: Sebagian besar data memiliki lebar gambar di bawah 2.000 piksel, "
         "namun terdapat lonjakan drastis pada sebagian kecil data yang mencapai hampir 7.000 piksel.\n\n"
         "Implikasi Bisnis: Gambar dengan resolusi yang terlalu ekstrem (sangat lebar) berpotensi "
-        "memperlambat waktu pemrosesan model AI (latency) dan meningkatkan konsumsi memori saat ekstraksi dilakukan.\n\n"
+        "memperlambat waktu pemrosesan model AI (latency) and meningkatkan konsumsi memori saat ekstraksi dilakukan.\n\n"
         "Outlier Aspect Ratio (Struk vs Non-Struk)\n\n"
         "Konsistensi Struk: Kelompok data bertanda 'struk' memiliki aspect ratio yang sangat konsisten dan rapat "
         "(mendekati 1.0), menunjukkan bentuk dokumen yang seragam.\n\n"
@@ -325,7 +335,6 @@ elif menu == "BQ1: Performa OCR":
     # 2. VISUALISASI PIE CHART DISTRIBUSI STATUS PARSING
     st.subheader("🍕 Distribusi Status Parsing per Model OCR")
     
-    # Ambil data pengelompokkan status berdasarkan df_detail
     status_counts = df_detail.groupby(['Model', 'Status']).size().unstack(fill_value=0)
     
     label_map = {
@@ -378,20 +387,14 @@ elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
     st.markdown("Sistem menghitung perkiraan laba berdasarkan total pengeluaran item struk belanja dan persentase margin keuntungan standar.")
     
-    # 1. REPLIKASI LOGIKA DEMO COLAB (Mengunci Data Hanya pada Struk primer_0079.jpg)
     sample_file = 'primer_0079.jpg'
-    
-    # Ambil data murni dari df_primer agar urutan indeksnya asli seperti di Colab
     sample_struk = df_primer[df_primer['filename'] == sample_file].copy()
     
-    # Margin dikunci pada 20% (persen_margin=0.20) sesuai demo ujian di notebook
     margin_tetap = 20
     sample_struk['laba_total'] = sample_struk['total_harga_item'] * (margin_tetap / 100)
     
-    # VISUALISASI ESTIMASI LABA PER ITEM (Top 15 Horizontal Bar Chart)
     st.subheader(f"📊 Top 15 Komoditas Berdasarkan Estimasi Laba (Demo Struk: {sample_file})")
     
-    # Logika filter, pengurutan, dan tail(15) disamakan 100% dengan notebook
     df_plot = (
         sample_struk[sample_struk['laba_total'] > 0]
         .sort_values('laba_total')
@@ -420,7 +423,6 @@ elif menu == "BQ2: Estimasi Laba":
 
     st.divider()
 
-    # ### Insight BQ2 RESMI DARI NOTEBOOK ###
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 2")
     st.markdown("""
     Dengan input persentase margin dari pengguna, sistem dapat langsung menghitung estimasi laba per item tanpa perlu memasukkan harga beli satu per satu. Berdasarkan demo struk `primer_0079.jpg` dengan margin 20%, total omzet struk sebesar **Rp 67.100** menghasilkan estimasi laba **Rp 13.420**.
@@ -434,7 +436,6 @@ elif menu == "BQ2: Estimasi Laba":
 elif menu == "BQ3: Laporan Transaksi":
     st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur untuk mendukung pengambilan keputusan bisnis?")
     
-    # Perlu import matplotlib ticker untuk memformat sumbu X pada histogram
     import matplotlib.ticker as mticker
 
     # 1. VISUALISASI GRID: DISTRIBUSI DATA TRANSAKSI
@@ -502,7 +503,6 @@ elif menu == "BQ3: Laporan Transaksi":
     kat_counts = df_clean['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
 
     fig2, ax2 = plt.subplots(figsize=(8, 5))
-
     colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
 
     bars2 = ax2.barh(
@@ -558,7 +558,7 @@ elif menu == "BQ3: Laporan Transaksi":
 
     st.divider()
 
-    # 4. INSIGHT BQ3 RESMI DARI NOTEBOOK
+    # 4. INSIGHT BQ3
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 3")
     st.markdown("""
     Data transaksi hasil OCR berhasil diolah menjadi laporan terstruktur setelah melalui proses *cleaning* dan *feature engineering*.
