@@ -30,7 +30,7 @@ def kategorikan_harga(h):
 def load_data():
     # 1. BACA LANGSUNG DATASET REVISI FINAL YANG SUDAH BERSIH DARI COLAB
     # Ini menjamin df_clean berisi baris data yang persis sama dengan memori di Colab
-    df_clean = pd.read_csv('data/dataset_ocr_clear_final.csv')
+    
     
     # 2. Baca file pendukung evaluasi model OCR lainnya
     df_primer = pd.read_csv('data/Dataset_Terstruktur_Primer_NOPI.csv')
