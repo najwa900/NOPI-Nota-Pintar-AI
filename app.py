@@ -434,7 +434,7 @@ elif menu == "BQ3: Laporan Transaksi":
     df_harga = df_clean[df_clean['harga_satuan'] > 0]
     median_harga = df_harga['harga_satuan'].median()
 
-        plt.suptitle('BQ3 — Distribusi Data Transaksi', fontsize=14, fontweight='bold')
+        plt.subtitle('BQ3 — Distribusi Data Transaksi', fontsize=14, fontweight='bold')
         plt.tight_layout()
         st.pyplot(fig)
     fig, axes = plt.subplots(1, 2, figsize=(14,5))
