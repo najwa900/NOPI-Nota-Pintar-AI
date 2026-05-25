@@ -26,97 +26,55 @@ def kategorikan_harga(h):
     else: return 'Sangat Mahal (>100rb)'
 
 
-# --- LOAD DATA (REVISI PERBAIKAN TOTAL SINKRONISASI COLAB) ---
 # --- LOAD DATA ---
 @st.cache_data
 def load_data():
-    # Mengunci jalur folder absolut tempat file app.py berada agar bebas dari FileNotFoundError
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    
+    DATA_DIR = os.path.join(BASE_DIR, "data")
 
-    path_primer = os.path.join(BASE_DIR, 'data', 'Dataset_Terstruktur_Primer_NOPI.csv')
-    path_evaluasi = os.path.join(BASE_DIR, 'data', 'evaluasi_3_model.csv')
-    path_detail = os.path.join(BASE_DIR, 'data', 'detail_akurasi_semua_model.csv')
-    path_clean = os.path.join(BASE_DIR, 'data', 'dataset_ocr_clear_final.csv')
-    path_all = os.path.join(BASE_DIR, 'data', 'all_images_metadata.csv')
+    # path file
+    path_primer = os.path.join(DATA_DIR, "Dataset_Terstruktur_Primer_NOPI.csv")
+    path_evaluasi = os.path.join(DATA_DIR, "evaluasi_3_model.csv")
+    path_detail = os.path.join(DATA_DIR, "detail_akurasi_semua_model.csv")
+    path_clean = os.path.join(DATA_DIR, "dataset_ocr_clear_final.csv")
+    path_all = os.path.join(DATA_DIR, "all_images_metadata.csv")
 
-    # Fallback jika folder data/ diletakkan sejajar tanpa sub-direktori
-    # fallback jika folder data tidak ada
-    if not os.path.exists(path_clean):
+    # cek file wajib
+    required_files = [
+        path_primer,
+        path_evaluasi,
+        path_detail,
+        path_clean,
+        path_all
+    ]
 
-        path_primer = 'Dataset_Terstruktur_Primer_NOPI.csv'
-        path_evaluasi = 'evaluasi_3_model.csv'
-        path_detail = 'detail_akurasi_semua_model.csv'
-        path_clean = 'dataset_ocr_clear_final.csv'
-        path_all = 'all_images_metadata.csv'
+    for file in required_files:
+        if not os.path.exists(file):
+            raise FileNotFoundError(f"File tidak ditemukan: {file}")
 
-    # 1. Memuat berkas csv pendukung evaluasi model
-    # load semua csv
+    # load csv
     df_primer = pd.read_csv(path_primer)
     df_evaluasi = pd.read_csv(path_evaluasi)
     df_detail = pd.read_csv(path_detail)
 
-    # 2. MEMUAT DATASET UTAMA BQ2 & BQ3
-    if os.path.exists(path_clean):
-        # MURNI MEMBACA DATA FINAL COLAB TANPA DITIMPA/DI-OVERWRITE LAGI
-        df_clean = pd.read_csv(path_clean, encoding='utf-8', errors='ignore')
-    else:
-        # Jika file csv tidak sengaja terhapus, baru jalankan kriteria cleaning Colab secara otomatis
-        df_clean = df_primer.dropna(subset=['nama_barang', 'harga_satuan']).copy()
-        df_clean['nama_barang'] = df_clean['nama_barang'].apply(clean_nama_barang)
-        if 'jumlah_barang' in df_clean.columns:
-            df_clean = df_clean[df_clean['jumlah_barang'] <= 200]
-        df_clean = df_clean[df_clean['harga_satuan'] >= 500]
-        p99_harga = df_clean['harga_satuan'].quantile(0.99)
-        df_clean = df_clean[df_clean['harga_satuan'] <= p99_harga]
-        df_clean['kategori_harga'] = df_clean['harga_satuan'].apply(kategorikan_harga)
-
-    # 3. Memuat berkas metadata gambar pendukung halaman EDA
     # dataset utama
     df_clean = pd.read_csv(
         path_clean,
-        encoding='utf-8',
-        errors='ignore'
+        encoding="utf-8",
+        on_bad_lines="skip"
     )
 
     # pastikan kategori_harga ada
     if 'kategori_harga' not in df_clean.columns:
-
-        df_clean['kategori_harga'] = (
-            df_clean['harga_satuan']
-            .apply(kategorikan_harga)
-        )
+        df_clean['kategori_harga'] = df_clean['harga_satuan'].apply(kategorikan_harga)
 
     # metadata gambar
-    try:
-        df_all = pd.read_csv(path_all)
+    df_all = pd.read_csv(path_all)
 
-    except:
-        np.random.seed(42)
-        n_samples = 2117
-        labels = ['struk'] * 1058 + ['non_struk'] * 1059
-        widths = np.random.normal(1200, 400, n_samples).clip(400, 7000)
-        heights = np.random.normal(1800, 600, n_samples).clip(600, 9000)
-        sources = np.random.choice(['Kamera_HP', 'Unduhan_WA', 'Scan_Flatbed'], n_samples)
-        df_all = pd.DataFrame({
-            'label': labels, 
-            'width': widths, 
-            'height': heights, 
-            'source': sources, 
-            'aspect_ratio': heights / widths
-        })
-
-    # Verifikasi kolom kategori_harga pada metadata gambar agar EDA aman
+    # kategori harga metadata
     if 'harga_satuan' in df_all.columns:
         df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
-    else:
-        if 'kategori_harga' not in df_all.columns:
-            df_all['kategori_harga'] = np.random.choice(
-                ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)', 'Mahal (50-100rb)'], 
-                size=len(df_all)
-            )
-        df_all = pd.DataFrame()
 
     return (
         df_primer,
@@ -126,26 +84,9 @@ def load_data():
         df_all
     )
 
-    # Mengembalikan data struktur yang sudah sinkron ke dalam fungsi global
-    return df_primer, df_evaluasi, df_detail, df_clean, df_all
 
-# LOAD DATA
+# --- LOAD SEMUA DATA ---
 try:
-    df_primer, df_evaluasi, df_detail, df_clean, df_all = load_data()
-except Exception as e:
-    st.error(f"Gagal memuat file CSV. Pastikan file tersedia. Error: {e}")
-    st.stop()
-
-    if 'harga_satuan' in df_all.columns:
-        df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
-    else:
-        if 'kategori_harga' not in df_all.columns:
-            df_all['kategori_harga'] = np.random.choice(
-                ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)', 'Mahal (50-100rb)'], 
-                size=len(df_all)
-            )
-
-    return df_primer, df_evaluasi, df_detail, df_clean, df_all
     (
         df_primer,
         df_evaluasi,
@@ -154,29 +95,9 @@ except Exception as e:
         df_all
     ) = load_data()
 
-try:
-    df_primer, df_evaluasi, df_detail, df_clean, df_all = load_data()
 except Exception as e:
-    st.error(f"Gagal memuat file CSV. Pastikan file tersedia. Error: {e}")
-    st.stop()
-    if 'harga_satuan' in df_all.columns:
-        df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
-    else:
-        if 'kategori_harga' not in df_all.columns:
-            df_all['kategori_harga'] = np.random.choice(
-                ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)', 'Mahal (50-100rb)'], 
-                size=len(df_all)
-            )
-
-    return df_primer, df_evaluasi, df_detail, df_clean, df_all
-
-try:
-    df_primer, df_evaluasi, df_detail, df_clean, df_all = load_data()
-except Exception as e:
-    st.error(f"Gagal memuat file CSV. Pastikan file diletakkan sejajar atau di folder 'data/'. Error: {e}")
     st.error(f"Gagal memuat data: {e}")
     st.stop()
-
 # --- SIDEBAR NAVIGASI ---
 st.sidebar.title("🚀 NOPI Dashboard")
 st.sidebar.info("Aplikasi berbasis OCR untuk membantu manajemen keuangan UMKM.")
