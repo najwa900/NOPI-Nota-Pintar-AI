@@ -338,11 +338,11 @@ elif menu == "BQ2: Estimasi Laba":
 
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 2")
     st.markdown("""
-Dengan input persentase margin dari pengguna, sistem dapat langsung menghitung estimasi laba per item tanpa perlu memasukkan harga beli satu per satu. Berdasarkan demo struk `primer_0079.jpg` dengan margin 20%, total omzet struk sebesar **Rp 67.100** menghasilkan estimasi laba sebesar **Rp 13.420**.
+Berdasarkan input persentase margin dari pengguna, sistem dapat menghitung estimasi laba per item secara otomatis tanpa perlu memasukkan harga beli satu per satu. Pada demo struk `primer_0079.jpg` dengan margin 20%, total omzet sebesar **Rp 67.100** menghasilkan estimasi laba sebesar **Rp 13.420**.
 
-Item dengan kontribusi laba tertinggi adalah **Kanzlr Bakso Ori 48G** sebesar **Rp 3.480** karena dibeli sebanyak 2 unit, kemudian diikuti oleh **Nutrijel Pwd.Strw.15** sebesar **Rp 2.640**. Kondisi ini menunjukkan bahwa produk yang dibeli lebih dari satu unit berpotensi memberikan kontribusi laba yang lebih besar, walaupun harga per itemnya tidak selalu paling mahal.
+Item dengan kontribusi laba tertinggi adalah **Kanzlr Bakso Ori 48G** sebesar **Rp 3.480**, karena item tersebut dibeli sebanyak 2 unit. Selanjutnya, item dengan kontribusi laba tertinggi kedua adalah **Nutrijel Pwd.Strw.15** sebesar **Rp 2.640**. Hal ini menunjukkan bahwa jumlah pembelian memiliki pengaruh besar terhadap kontribusi laba, meskipun harga satuan item tidak selalu menjadi yang paling tinggi.
 
-Pendekatan seperti ini cukup membantu pelaku UMKM yang belum memiliki pencatatan harga beli yang rapi. Pengguna hanya perlu memasukkan persentase margin, lalu sistem akan otomatis menghitung estimasi laba setiap item sehingga proses pembukuan menjadi lebih mudah, cepat, dan praktis.
+Dengan pendekatan ini, sistem menjadi lebih praktis bagi pelaku UMKM yang belum memiliki pencatatan harga beli secara terstruktur. Pengguna cukup memasukkan satu nilai margin, lalu sistem dapat menghasilkan estimasi laporan laba per item yang siap digunakan sebagai dasar pembukuan sederhana.
 """)
 
 # --- BQ3: LAPORAN TRANSAKSI ---
