@@ -448,12 +448,42 @@ elif menu == "BQ3: Laporan Transaksi":
     # Baris baru melebar ke bawah untuk meninjau audit 10 Struk Teratas
     st.markdown("**C. Pengeluaran Teratas Berdasarkan Berkas Struk Nota Belanja Valid**")
     
-    # Jika di Colab kamu memakai total_harga_item atau total_transaksi untuk Top Struk, 
-    # kita sorting langsung dari df_bq3 yang sudah jadi
+    # 1. JALANKAN AGREGASI PER STRUK/NOTA (PERSIS SEPERTI DI COLAB)
+    laporan_struk = df_bq3.groupby('filename').agg(
+        nama_toko=('nama_toko', 'first'),
+        tanggal_clean=('tanggal_clean', 'first') if 'tanggal_clean' in df_bq3.columns else ('tanggal', 'first'),
+        tanggal_valid=('tanggal_valid', 'first') if 'tanggal_valid' in df_bq3.columns else ('filename', 'count'),
+        jumlah_item=('nama_barang', 'count'),
+        total_qty=('jumlah_barang', 'sum'),
+        total_transaksi=('total_harga_item', 'sum'),
+        estimasi_laba=('estimasi_laba_20', 'sum')
+    ).reset_index().sort_values('total_transaksi', ascending=False)
+
+    # 2. FILTER STRUK VALID YANG IDENTIK DENGAN LOGIKA NOTEBOOK
+    # Konversi tanggal_valid ke string dulu agar aman dari bug tipe data di server Streamlit
+    if 'tanggal_valid' in laporan_struk.columns:
+        cond_date_c = laporan_struk['tanggal_valid'].astype(str).str.lower().str.contains('true|1', na=False)
+    else:
+        cond_date_c = True
+
+    laporan_struk_filtered = laporan_struk[
+        (laporan_struk['total_transaksi'] <= 500000) &
+        (laporan_struk['total_qty'] <= 50) &
+        cond_date_c &
+        (laporan_struk['nama_toko'].str.len() >= 5) &
+        (laporan_struk['nama_toko'].str.contains(r'[A-Za-z]{5,}', regex=True, na=False)) &
+        (~laporan_struk['nama_toko'].str.contains(
+            r'Penjualan|Distribus|\d{8,}|^Shop$|^Tong$|^Trre$|Deeok|Distrab|Duplikat|Ptoomfa|Mamy Poko|Opnstd|Apaaja|Yangaku|Higuna|Wiguna',
+            case=False, regex=True, na=False
+        ))
+    ].copy()
+
+    # 3. AMBIL TOP 10 STRUK BERDASARKAN TOTAL TRANSAKSI
     top_struk = (
-        df_bq3.sort_values('total_harga_item', ascending=False)
+        laporan_struk_filtered
+        .sort_values('total_transaksi', ascending=False)
         .head(10)
-        .sort_values('total_harga_item')
+        .sort_values('total_transaksi')
     )
 
     if not top_struk.empty:
@@ -461,7 +491,7 @@ elif menu == "BQ3: Laporan Transaksi":
         fig_c, ax_c = plt.subplots(figsize=(10, 5))
         bars3 = ax_c.barh(
             top_struk['filename'],
-            top_struk['total_harga_item'],
+            top_struk['total_transaksi'], # Gunakan total_transaksi hasil sum nota, bukan total_harga_item ritel
             color='mediumpurple',
             alpha=0.85,
             edgecolor='white'
@@ -481,15 +511,28 @@ elif menu == "BQ3: Laporan Transaksi":
     # ==========================================
     # LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
     # ==========================================
+   # ==========================================
+    # LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
+    # ==========================================
     with st.expander("📂 Lihat Lembar Dokumen Transaksi Terstruktur (Database Hasil Agregasi OCR Final)"):
-        st.write("Daftar 10 baris teratas nota belanja hasil pembacaan database terstruktur bersih:")
+        st.write("Daftar 10 baris teratas nota belanja hasil pembacaan database terstruktur bersih (Sesuai Hasil Colab):")
         
-        # Kolom disesuaikan dengan isi aslinya sesuai yang kamu sebutkan
-        kolom_tabel = ['filename', 'nama_toko', 'tanggal_clean', 'nama_barang', 'jumlah_barang', 'harga_satuan', 'total_harga_item', 'estimasi_laba_20']
-        kolom_tabel_ada = [c for c in kolom_tabel if c in df_bq3.columns]
+        # Kolom acuan yang dicari disesuaikan dengan isi tabel laporan_struk_filtered di Colab
+        kolom_tabel = [
+            'filename', 
+            'nama_toko', 
+            'tanggal_clean', 
+            'tanggal_valid', 
+            'jumlah_item', 
+            'total_qty', 
+            'total_transaksi', 
+            'estimasi_laba'
+        ]
+        kolom_tabel_ada = [c for c in kolom_tabel if c in laporan_struk_filtered.columns]
         
+        # MURNI MEMANGGIL laporan_struk_filtered YANG SUDAH DIURUTKAN BERDASARKAN TOTAL TRANSAKSI TERBESAR
         st.dataframe(
-            df_bq3[kolom_tabel_ada].sort_values('total_harga_item', ascending=False).head(10),
+            laporan_struk_filtered[kolom_tabel_ada].head(10),
             use_container_width=True
         )
 
