@@ -32,32 +32,48 @@ def load_data():
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-    path_primer = os.path.join(BASE_DIR, 'data', 'Dataset_Terstruktur_Primer_NOPI.csv')
-    path_evaluasi = os.path.join(BASE_DIR, 'data', 'evaluasi_3_model.csv')
-    path_detail = os.path.join(BASE_DIR, 'data', 'detail_akurasi_semua_model.csv')
-    path_clean = os.path.join(BASE_DIR, 'data', 'dataset_ocr_clear_final.csv')
-    path_all = os.path.join(BASE_DIR, 'data', 'all_images_metadata.csv')
+    path_primer = os.path.join(
+        BASE_DIR,
+        'data',
+        'Dataset_Terstruktur_Primer_NOPI.csv'
+    )
 
-    # fallback jika folder data tidak ada
-    if not os.path.exists(path_clean):
+    path_evaluasi = os.path.join(
+        BASE_DIR,
+        'data',
+        'evaluasi_3_model.csv'
+    )
 
-        path_primer = 'Dataset_Terstruktur_Primer_NOPI.csv'
-        path_evaluasi = 'evaluasi_3_model.csv'
-        path_detail = 'detail_akurasi_semua_model.csv'
-        path_clean = 'dataset_ocr_clear_final.csv'
-        path_all = 'all_images_metadata.csv'
+    path_detail = os.path.join(
+        BASE_DIR,
+        'data',
+        'detail_akurasi_semua_model.csv'
+    )
 
-    # load semua csv
+    path_clean = os.path.join(
+        BASE_DIR,
+        'data',
+        'dataset_ocr_clear_final.csv'
+    )
+
+    path_all = os.path.join(
+        BASE_DIR,
+        'data',
+        'all_images_metadata.csv'
+    )
+
+    # LOAD CSV
     df_primer = pd.read_csv(path_primer)
     df_evaluasi = pd.read_csv(path_evaluasi)
     df_detail = pd.read_csv(path_detail)
 
-    # dataset utama
     df_clean = pd.read_csv(
         path_clean,
         encoding='utf-8',
         errors='ignore'
     )
+
+    df_all = pd.read_csv(path_all)
 
     # pastikan kategori_harga ada
     if 'kategori_harga' not in df_clean.columns:
@@ -67,13 +83,30 @@ def load_data():
             .apply(kategorikan_harga)
         )
 
-    # metadata gambar
-    try:
-        df_all = pd.read_csv(path_all)
+    return (
+        df_primer,
+        df_evaluasi,
+        df_detail,
+        df_clean,
+        df_all
+    )
 
-    except:
-        df_all = pd.DataFrame()
 
+# LOAD DATA
+try:
+
+    (
+        df_primer,
+        df_evaluasi,
+        df_detail,
+        df_clean,
+        df_all
+    ) = load_data()
+
+except Exception as e:
+
+    st.error(f"Gagal memuat data: {e}")
+    st.stop()
     return (
         df_primer,
         df_evaluasi,
