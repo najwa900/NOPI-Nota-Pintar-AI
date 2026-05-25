@@ -356,8 +356,7 @@ elif menu == "BQ3: Laporan Transaksi":
     # LOGIKA AGREGASI DATA (SINKRONISASI MURNI DARI DATASET CLEAR)
     # ==========================================
     # Menghitung estimasi laba jika belum ada kolomnya di dataset_ocr_clear_final
-    if 'estimasi_laba_20' not in df_clean.columns:
-        df_clean['estimasi_laba_20'] = df_clean['total_harga_item'] * 0.20
+    df_clean['estimasi_laba_20'] = df_clean['total_harga_item'] * 0.20
 
     # Ambil pengelompokan agregasi per berkas nota/struk langsung dari data bersih
     laporan_struk = df_clean.groupby('filename').agg(
@@ -368,11 +367,15 @@ elif menu == "BQ3: Laporan Transaksi":
         total_qty=('jumlah_barang', 'sum') if 'jumlah_barang' in df_clean.columns else ('nama_barang', 'count'),
         total_transaksi=('total_harga_item', 'sum'),
         estimasi_laba=('estimasi_laba_20', 'sum')
-    ).reset_index()
+    ).reset_index().sort_values('total_transaksi', ascending=False)
+
+    # Sinkronisasi tipe data tanggal_valid agar terbaca string/boolean secara aman di server web
+    if 'tanggal_valid' in laporan_struk.columns:
+        cond_date = laporan_struk['tanggal_valid'].astype(str).str.lower().str.contains('true|1', na=False)
+    else:
+        cond_date = True
 
     # Kriteria filter pembatasan data agar terbebas dari text noise hasil OCR
-    cond_date = (laporan_struk['tanggal_valid'] == True) if 'tanggal_valid' in laporan_struk.columns and laporan_struk['tanggal_valid'].dtype == bool else True
-
     laporan_struk_filtered = laporan_struk[
         (laporan_struk['total_transaksi'] <= 500000) &
         (laporan_struk['total_qty'] <= 50) &
@@ -401,48 +404,50 @@ elif menu == "BQ3: Laporan Transaksi":
         df_harga = df_clean_valid[df_clean_valid['harga_satuan'] > 0] if not df_clean_valid.empty else df_clean[df_clean['harga_satuan'] > 0]
         median_harga = df_harga['harga_satuan'].median()
 
-        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+        # FIX GRAPH: Pisahkan Object Figure khusus untuk Chart A
+        fig_a, axes_a = plt.subplots(1, 2, figsize=(14, 5))
 
         # Chart 1: Distribusi harga satuan
-        axes[0].hist(
+        axes_a[0].hist(
             df_harga['harga_satuan'],
             bins=30,
             color='steelblue',
             alpha=0.8,
             edgecolor='white'
         )
-        axes[0].axvline(
+        axes_a[0].axvline(
             median_harga,
             color='tomato',
             linestyle='--',
             linewidth=2,
             label=f'Median: Rp {median_harga:,.0f}'
         )
-        axes[0].set_title('Distribusi Harga Satuan Item', fontweight='bold')
-        axes[0].set_xlabel('Harga Satuan (Rp)')
-        axes[0].set_ylabel('Frekuensi')
-        axes[0].xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f'{x/1000:.0f}rb'))
-        axes[0].legend()
+        axes_a[0].set_title('Distribusi Harga Satuan Item', fontweight='bold')
+        axes_a[0].set_xlabel('Harga Satuan (Rp)')
+        axes_a[0].set_ylabel('Frekuensi')
+        axes_a[0].xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f'{x/1000:.0f}rb'))
+        axes_a[0].legend()
 
         # Chart 2: Distribusi jumlah barang (QTY)
         df_qty_source = df_clean_valid if not df_clean_valid.empty else df_clean
         jumlah_counts = df_qty_source['jumlah_barang'].value_counts().sort_index().head(10) if 'jumlah_barang' in df_qty_source.columns else pd.Series([0], index=[1])
         
-        bars1 = axes[1].bar(
+        bars1 = axes_a[1].bar(
             jumlah_counts.index.astype(str),
             jumlah_counts.values,
             color='mediumseagreen',
             alpha=0.85,
             edgecolor='white'
         )
-        axes[1].bar_label(bars1, padding=3)
-        axes[1].set_title('Distribusi Jumlah Barang per Baris Transaksi', fontweight='bold')
-        axes[1].set_xlabel('Jumlah Barang')
-        axes[1].set_ylabel('Frekuensi')
+        axes_a[1].bar_label(bars1, padding=3)
+        axes_a[1].set_title('Distribusi Jumlah Barang per Baris Transaksi', fontweight='bold')
+        axes_a[1].set_xlabel('Jumlah Barang')
+        axes_a[1].set_ylabel('Frekuensi')
 
         plt.suptitle('BQ3 — Distribusi Data Transaksi', fontsize=14, fontweight='bold')
-        plt.tight_layout()
-        st.pyplot(fig)
+        fig_a.tight_layout()
+        st.pyplot(fig_a)
+        plt.close(fig_a)  # Bersihkan memori kanvas A
 
     with col_chartB:
         st.markdown("**B. Segmentasi Item Berdasarkan Rentang Harga**")
@@ -456,22 +461,24 @@ elif menu == "BQ3: Laporan Transaksi":
         df_kat_source = df_clean_valid if not df_clean_valid.empty else df_clean
         kat_counts = df_kat_source['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
 
-        fig2, ax2 = plt.subplots(figsize=(8, 5))
+        # FIX GRAPH: Pisahkan Object Figure khusus untuk Chart B
+        fig_b, ax_b = plt.subplots(figsize=(8, 5))
         colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
 
-        bars2 = ax2.barh(
+        bars2 = ax_b.barh(
             kat_counts.index,
             kat_counts.values,
             color=colors_kat,
             alpha=0.85,
             edgecolor='white'
         )
-        ax2.bar_label(bars2, padding=3, fontsize=10)
-        ax2.set_title('BQ3 — Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
-        ax2.set_xlabel('Jumlah Item')
+        ax_b.bar_label(bars2, padding=3, fontsize=10)
+        ax_b.set_title('BQ3 — Segmentasi Item berdasarkan Kategori Harga', fontweight='bold')
+        ax_b.set_xlabel('Jumlah Item')
         
-        plt.tight_layout()
-        st.pyplot(fig2)
+        fig_b.tight_layout()
+        st.pyplot(fig_b)
+        plt.close(fig_b)  # Bersihkan memori kanvas B
 
     # Baris baru melebar ke bawah untuk meninjau audit 10 Struk Teratas
     st.markdown("**C. Pengeluaran Teratas Berdasarkan Berkas Struk Nota Belanja Valid**")
@@ -484,20 +491,22 @@ elif menu == "BQ3: Laporan Transaksi":
     )
 
     if not top_struk.empty:
-        fig3, ax3 = plt.subplots(figsize=(10, 5))
-        bars3 = ax3.barh(
+        # FIX GRAPH: Pisahkan Object Figure khusus untuk Chart C
+        fig_c, ax_c = plt.subplots(figsize=(10, 5))
+        bars3 = ax_c.barh(
             top_struk['filename'],
             top_struk['total_transaksi'],
             color='mediumpurple',
             alpha=0.85,
             edgecolor='white'
         )
-        ax3.bar_label(bars3, fmt='Rp %.0f', padding=3, fontsize=9)
-        ax3.set_title('BQ3 — Struk Teratas berdasarkan Total Transaksi Valid', fontweight='bold')
-        ax3.set_xlabel('Total Transaksi (Rp)')
+        ax_c.bar_label(bars3, fmt='Rp %.0f', padding=3, fontsize=9)
+        ax_c.set_title('BQ3 — Struk Teratas berdasarkan Total Transaksi Valid', fontweight='bold')
+        ax_c.set_xlabel('Total Transaksi (Rp)')
         
-        plt.tight_layout()
-        st.pyplot(fig3)
+        fig_c.tight_layout()
+        st.pyplot(fig_c)
+        plt.close(fig_c)  # Bersihkan memori kanvas C
     else:
         st.warning("Tidak ada data transaksi valid untuk ditampilkan pada grafik pengeluaran teratas.")
 
