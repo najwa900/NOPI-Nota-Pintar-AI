@@ -338,12 +338,12 @@ elif menu == "BQ2: Estimasi Laba":
 
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 2")
     st.markdown("""
-    Dengan input persentase margin dari pengguna, sistem dapat langsung menghitung estimasi laba per item tanpa perlu memasukkan harga beli satu per satu. Berdasarkan demo struk `primer_0079.jpg` dengan margin 20%, total omzet struk sebesar **Rp 67.100** menghasilkan estimasi laba **Rp 13.420**.
+Dengan input persentase margin dari pengguna, sistem dapat langsung menghitung estimasi laba per item tanpa perlu memasukkan harga beli satu per satu. Berdasarkan demo struk `primer_0079.jpg` dengan margin 20%, total omzet struk sebesar **Rp 67.100** menghasilkan estimasi laba sebesar **Rp 13.420**.
 
-    Item dengan kontribusi laba tertinggi adalah **Kanzlr Bakso Ori 48G** (Rp 3.480) karena dibeli 2 unit, diikuti **Nutrijel Pwd.Strw.15** (Rp 2.640). Konidisi ini menunjukkan bahwa produk yang dibeli lebih dari satu unit berpotensi memberikan kontribusi laba yang lebih besar, walaupun harga per itemnya tidak selalu paling mahal.
+Item dengan kontribusi laba tertinggi adalah **Kanzlr Bakso Ori 48G** sebesar **Rp 3.480** karena dibeli sebanyak 2 unit, kemudian diikuti oleh **Nutrijel Pwd.Strw.15** sebesar **Rp 2.640**. Kondisi ini menunjukkan bahwa produk yang dibeli lebih dari satu unit berpotensi memberikan kontribusi laba yang lebih besar, walaupun harga per itemnya tidak selalu paling mahal.
 
-Pendekatan seperti ini cukup membantu pelaku UMKM yang belum memiliki pencatatan harga beli yang rapi. Pengguna hanya perlu memasukkan persentase margin, lalu sistem akan otomatis menghitung estimasi laba setiap item sehingga proses pembukuan menjadi lebih mudah dan praktis.
-    """)
+Pendekatan seperti ini cukup membantu pelaku UMKM yang belum memiliki pencatatan harga beli yang rapi. Pengguna hanya perlu memasukkan persentase margin, lalu sistem akan otomatis menghitung estimasi laba setiap item sehingga proses pembukuan menjadi lebih mudah, cepat, dan praktis.
+""")
 
 # --- BQ3: LAPORAN TRANSAKSI ---
 elif menu == "BQ3: Laporan Transaksi":
