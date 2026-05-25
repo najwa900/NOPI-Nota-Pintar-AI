@@ -38,7 +38,7 @@ def load_data():
     path_evaluasi = os.path.join(DATA_DIR, "evaluasi_3_model.csv")
     path_detail = os.path.join(DATA_DIR, "detail_akurasi_semua_model.csv")
     path_clean = os.path.join(DATA_DIR, "dataset_ocr_clean_final.csv")
-    path_all = os.path.join(DATA_DIR, "all_images_metadata.csv")
+   
 
     # cek file wajib
     required_files = [
