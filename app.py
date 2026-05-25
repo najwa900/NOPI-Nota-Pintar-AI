@@ -353,45 +353,11 @@ elif menu == "BQ3: Laporan Transaksi":
     import matplotlib.ticker as mticker
 
     # ==========================================
-    # LOGIKA FILTER ITEM LEVEL (SINKRONISASI COLA PATOKAN GRAFIK)
+    # LOGIKA DATA (MURNI MENGGUNAKAN DATASET CLEAN FINAL)
     # ==========================================
-    # 1. Pastikan kolom estimasi laba terhitung langsung di baris item
-    df_clean['estimasi_laba_20'] = df_clean['total_harga_item'] * 0.20
-
-    # 2. FILTER TINGKAT ITEM (Menghapus outliers harga > 140rb & QTY > 5 agar grafik kembar)
-    df_clean_valid = df_clean[
-        (df_clean['harga_satuan'] > 0) & 
-        (df_clean['harga_satuan'] <= 140000) & 
-        (df_clean['jumlah_barang'] <= 5)
-    ].copy()
-
-    # 3. Hilangkan baris data yang mengandung nama toko noise OCR
-    if 'nama_toko' in df_clean_valid.columns:
-        df_clean_valid = df_clean_valid[
-            (df_clean_valid['nama_toko'].str.len() >= 5) &
-            (~df_clean_valid['nama_toko'].str.contains(
-                r'Penjualan|Distribus|\d{8,}|^Shop$|^Tong$|^Trre$|Deeok|Distrab|Duplikat|Ptoomfa|Mamy Poko|Opnstd|Apaaja|Yangaku|Higuna|Wiguna',
-                case=False, regex=True, na=False
-            ))
-        ].copy()
-
-    # ==========================================
-    # LOGIKA AGREGASI STRUK (UNTUK GRAFIK C DAN TABEL)
-    # ==========================================
-    laporan_struk_filtered = df_clean_valid.groupby('filename').agg(
-        nama_toko=('nama_toko', 'first') if 'nama_toko' in df_clean_valid.columns else ('filename', 'first'),
-        tanggal_clean=('tanggal_clean', 'first') if 'tanggal_clean' in df_clean_valid.columns else (('tanggal', 'first') if 'tanggal' in df_clean_valid.columns else ('filename', 'first')),
-        jumlah_item=('nama_barang', 'count'),
-        total_qty=('jumlah_barang', 'sum'),
-        total_transaksi=('total_harga_item', 'sum'),
-        estimasi_laba=('estimasi_laba_20', 'sum')
-    ).reset_index()
-
-    # Filter batasan nilai total belanja per struk
-    laporan_struk_filtered = laporan_struk_filtered[
-        (laporan_struk_filtered['total_transaksi'] <= 500000) &
-        (laporan_struk_filtered['total_qty'] <= 50)
-    ].copy()
+    # Karena dataset_ocr_clear_final.csv sudah bersih total, kita langsung gunakan df_clean
+    # Tanpa filter manual tambahan agar tidak merusak sebaran distribusi data asli Colab
+    df_bq3 = df_clean.copy()
 
     # ==========================================
     # VISUALISASI GRID GRAFIK PERILAKU PASAR
@@ -402,14 +368,15 @@ elif menu == "BQ3: Laporan Transaksi":
     
     with col_chartA:
         st.markdown("**A. Distribusi Komponen Data Transaksi**")
-        median_harga = df_clean_valid['harga_satuan'].median()
+        df_harga = df_bq3[df_bq3['harga_satuan'] > 0]
+        median_harga = df_harga['harga_satuan'].median()
 
-        # Deklarasi Object Figure Terisolasi
+        # Deklarasi Object Kanvas Grafik A (Distribusi)
         fig_a, axes_a = plt.subplots(1, 2, figsize=(14, 5))
 
         # Chart 1: Distribusi harga satuan
         axes_a[0].hist(
-            df_clean_valid['harga_satuan'],
+            df_harga['harga_satuan'],
             bins=30,
             color='steelblue',
             alpha=0.8,
@@ -425,12 +392,11 @@ elif menu == "BQ3: Laporan Transaksi":
         axes_a[0].set_title('Distribusi Harga Satuan Item', fontweight='bold')
         axes_a[0].set_xlabel('Harga Satuan (Rp)')
         axes_a[0].set_ylabel('Frekuensi')
-        axes_a[0].set_xlim(0, 140000) # Memaksa batas X berhenti di 140rb persis Colab
         axes_a[0].xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f'{x/1000:.0f}rb'))
         axes_a[0].legend()
 
         # Chart 2: Distribusi jumlah barang (QTY)
-        jumlah_counts = df_clean_valid['jumlah_barang'].value_counts().sort_index().head(5)
+        jumlah_counts = df_bq3['jumlah_barang'].value_counts().sort_index().head(10)
         
         bars1 = axes_a[1].bar(
             jumlah_counts.index.astype(str),
@@ -458,8 +424,9 @@ elif menu == "BQ3: Laporan Transaksi":
             'Mahal (50-100rb)',
             'Sangat Mahal (>100rb)'
         ]
-        kat_counts = df_clean_valid['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
+        kat_counts = df_bq3['kategori_harga'].value_counts().reindex(kat_order, fill_value=0)
 
+        # Deklarasi Object Kanvas Grafik B (Segmentasi)
         fig_b, ax_b = plt.subplots(figsize=(8, 5))
         colors_kat = ['steelblue', 'mediumseagreen', 'orange', 'tomato', 'mediumpurple']
 
@@ -481,18 +448,20 @@ elif menu == "BQ3: Laporan Transaksi":
     # Baris baru melebar ke bawah untuk meninjau audit 10 Struk Teratas
     st.markdown("**C. Pengeluaran Teratas Berdasarkan Berkas Struk Nota Belanja Valid**")
     
+    # Jika di Colab kamu memakai total_harga_item atau total_transaksi untuk Top Struk, 
+    # kita sorting langsung dari df_bq3 yang sudah jadi
     top_struk = (
-        laporan_struk_filtered
-        .sort_values('total_transaksi', ascending=False)
+        df_bq3.sort_values('total_harga_item', ascending=False)
         .head(10)
-        .sort_values('total_transaksi')
+        .sort_values('total_harga_item')
     )
 
     if not top_struk.empty:
+        # Deklarasi Object Kanvas Grafik C (Top Struk)
         fig_c, ax_c = plt.subplots(figsize=(10, 5))
         bars3 = ax_c.barh(
             top_struk['filename'],
-            top_struk['total_transaksi'],
+            top_struk['total_harga_item'],
             color='mediumpurple',
             alpha=0.85,
             edgecolor='white'
@@ -515,11 +484,12 @@ elif menu == "BQ3: Laporan Transaksi":
     with st.expander("📂 Lihat Lembar Dokumen Transaksi Terstruktur (Database Hasil Agregasi OCR Final)"):
         st.write("Daftar 10 baris teratas nota belanja hasil pembacaan database terstruktur bersih:")
         
-        kolom_tabel = ['filename', 'nama_toko', 'tanggal_clean', 'jumlah_item', 'total_qty', 'total_transaksi', 'estimasi_laba']
-        kolom_tabel_ada = [c for c in kolom_tabel if c in laporan_struk_filtered.columns]
+        # Kolom disesuaikan dengan isi aslinya sesuai yang kamu sebutkan
+        kolom_tabel = ['filename', 'nama_toko', 'tanggal_clean', 'nama_barang', 'jumlah_barang', 'harga_satuan', 'total_harga_item', 'estimasi_laba_20']
+        kolom_tabel_ada = [c for c in kolom_tabel if c in df_bq3.columns]
         
         st.dataframe(
-            laporan_struk_filtered[kolom_tabel_ada].sort_values('total_transaksi', ascending=False).head(10),
+            df_bq3[kolom_tabel_ada].sort_values('total_harga_item', ascending=False).head(10),
             use_container_width=True
         )
 
