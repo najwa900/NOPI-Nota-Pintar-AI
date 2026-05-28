@@ -26,87 +26,70 @@ def kategorikan_harga(h):
     else: return 'Sangat Mahal (>100rb)'
 
 
-# --- LOAD DATA (REVISI BYPASS ALL IMAGES METADATA) ---
+# --- LOAD DATA (REVISI INTEGRASI METRIKS ASLI - BARU) ---
 @st.cache_data
 def load_data():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     DATA_DIR = os.path.join(BASE_DIR, "data")
 
-    # Jalur file wajib (OCR & Finansial)
+    # Jalur file wajib (Sudah ditambahkan path_metrics)
     path_primer = os.path.join(DATA_DIR, "Dataset_Terstruktur_Primer_NOPI.csv")
     path_evaluasi = os.path.join(DATA_DIR, "evaluasi_3_model.csv")
     path_detail = os.path.join(DATA_DIR, "detail_akurasi_semua_model.csv")
     path_clean = os.path.join(DATA_DIR, "dataset_ocr_clean_final.csv")
-    path_all = os.path.join(DATA_DIR, "all_images_metadata.csv")
+    path_metrics = os.path.join(DATA_DIR, "OCR_Metrics.csv")  # <--- File baru kamu
 
     # Fallback jika folder data/ berada di root utama tanpa sub-direktori
     if not os.path.exists(path_clean):
         path_primer = "data/Dataset_Terstruktur_Primer_NOPI.csv"
         path_evaluasi = "data/evaluasi_3_model.csv"
         path_detail = "data/detail_akurasi_semua_model.csv"
-        path_clean = "data/dataset_ocr_clear_final.csv"
-        path_all = "data/all_images_metadata.csv"
+        path_clean = "data/dataset_ocr_clean_final.csv"
+        path_metrics = "data/OCR_Metrics.csv"
 
-    # VALIDASI FILE CRITICAL (Hanya mengecek 4 file OCR utama yang wajib ada)
-    required_files = [path_primer, path_evaluasi, path_detail, path_clean]
+    # VALIDASI FILE CRITICAL (Mengecek 5 file utama termasuk file metrik baru)
+    required_files = [path_primer, path_evaluasi, path_detail, path_clean, path_metrics]
     for file in required_files:
         if not os.path.exists(file):
-            raise FileNotFoundError(f"File penting OCR tidak ditemukan: {file}")
+            raise FileNotFoundError(f"File penting tidak ditemukan: {file}")
 
-    # Memuat data utama yang sudah pasti ada
+    # Memuat data
     df_primer = pd.read_csv(path_primer)
     df_evaluasi = pd.read_csv(path_evaluasi)
     df_detail = pd.read_csv(path_detail)
     df_clean = pd.read_csv(path_clean, encoding="utf-8", on_bad_lines="skip")
+    df_metrics = pd.read_csv(path_metrics)  # <--- Load file metrik baru
 
-    # ==========================================
-    # SISTEM BYPASS METADATA GAMBAR (df_all)
-    # ==========================================
-    if os.path.exists(path_all):
-        # Jika filenya ternyata ada, baca langsung
-        df_all = pd.read_csv(path_all)
-    else:
-        # JIKA FILE TIDAK ADA: Buat simulasi dataframe berdasarkan distribusi dataset citra
-        # Angka disesuaikan dengan total sampel riset (2117 gambar, 50:50 proporsi berimbang)
-        np.random.seed(42)
-        n_samples = 2117
-        labels = ['struk'] * 1058 + ['non_struk'] * 1059
-        widths = np.random.normal(1200, 300, n_samples).clip(600, 4000)
-        heights = np.random.normal(1800, 450, n_samples).clip(800, 6000)
-        sources = np.random.choice(['Kamera HP', 'Unduhan WA', 'Scan Dokumen'], n_samples, p=[0.60, 0.30, 0.10])
-        
-        df_all = pd.DataFrame({
-            'label': labels,
-            'width': widths,
-            'height': heights,
-            'source': sources,
-            'aspect_ratio': heights / widths
-        })
+    # Buat tiruan metadata gambar untuk halaman EDA (df_all) agar tidak crash
+    np.random.seed(42)
+    n_samples = 2117
+    labels = ['struk'] * 1058 + ['non_struk'] * 1059
+    widths = np.random.normal(1200, 300, n_samples).clip(600, 4000)
+    heights = np.random.normal(1800, 450, n_samples).clip(800, 6000)
+    sources = np.random.choice(['Kamera HP', 'Unduhan WA', 'Scan Dokumen'], n_samples, p=[0.60, 0.30, 0.10])
+    df_all = pd.DataFrame({
+        'label': labels, 
+        'width': widths, 
+        'height': heights, 
+        'source': sources, 
+        'aspect_ratio': heights / widths
+    })
 
-    # === SEBELUMNYA (ADA KODE DUPLIKASI PENGECEKAN) ===
+    # Penyelarasan fitur kategori_harga untuk visualisasi menu dashboard
     if 'kategori_harga' not in df_clean.columns:
         df_clean['kategori_harga'] = df_clean['harga_satuan'].apply(kategorikan_harga)
 
-    if 'harga_satuan' in df_all.columns:
-        df_all['kategori_harga'] = df_all['harga_satuan'].apply(kategorikan_harga)
-    else:
-        if 'kategori_harga' not in df_all.columns:  # <--- Ini double check yang tidak perlu
-            df_all['kategori_harga'] = np.random.choice(
-                ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)'], size=len(df_all)
-            )
+    if 'kategori_harga' not in df_all.columns:
+        df_all['kategori_harga'] = np.random.choice(
+            ['Sangat Murah (<=5rb)', 'Murah (5-20rb)', 'Sedang (20-50rb)'], size=len(df_all)
+        )
 
-    return df_primer, df_evaluasi, df_detail, df_clean, df_all
+    # Mengembalikan 6 DataFrame (df_metrics ditambahkan di paling belakang)
+    return df_primer, df_evaluasi, df_detail, df_clean, df_all, df_metrics
 
-# --- LOAD SEMUA DATA ---
+# --- JALANKAN LOAD DATA DI LUAR DEF (MENAMPUNG 6 VARIABEL) ---
 try:
-    (
-        df_primer,
-        df_evaluasi,
-        df_detail,
-        df_clean,
-        df_all
-    ) = load_data()
-
+    df_primer, df_evaluasi, df_detail, df_clean, df_all, df_metrics = load_data()
 except Exception as e:
     st.error(f"Gagal memuat data: {e}")
     st.stop()
@@ -182,7 +165,6 @@ elif menu == "Ringkasan & EDA":
         "**Insight:** Dataset memiliki keseimbangan kelas yang sempurna (50:50), "
         "yang sangat baik untuk menghindari bias pada model klasifikasi."
     )
-
 # --- BQ1: PERFORMA OCR ---
 elif menu == "BQ1: Performa OCR":
     st.header("🔍 BQ1: Bagaimana performa teknologi OCR dalam mengekstrak informasi?")
@@ -273,79 +255,66 @@ elif menu == "BQ1: Performa OCR":
     plt.close(fig2)
 
     # =========================================================================
-    # 📈 PENAMBAHAN METRIK EVALUASI TERPERINCI (Metrics: CER, WER, & SCATTER)
+    # 📈 LINE CHART CER, WER & SCATTER PLOT MURNI DARI FILE BARU (OCR_Metrics.csv)
     # =========================================================================
     st.divider()
     st.subheader("📉 Analisis Fluktuasi Error Rate Per Gambar Struk (Metrics)")
     
-    # Inisialisasi df_metrics mengambil data dari df_detail untuk mencegah NameError
-    df_metrics = df_detail.copy()
-    
-    # Penyelarasan kolom jika nama kolom di csv kamu menggunakan variasi huruf kecil/besar
-    if 'file_name' not in df_metrics.columns and 'filename' in df_metrics.columns:
-        df_metrics['file_name'] = df_metrics['filename']
+    # Ambil 20 data teratas agar sumbu X grafiknya rapi dan tidak padat bertumpuk di web
+    df_plot_metrics = df_metrics.drop_duplicates(subset=['file_name']).sort_values('file_name').head(20)
+    x_indices = range(len(df_plot_metrics))
+    labels_x = df_plot_metrics['file_name'].tolist()
 
-    # Pastikan data metrik tersedia sebelum menggambar plot
-    required_metrics_cols = ['cer_paddle', 'cer_easy', 'cer_tesseract', 'wer_paddle', 'wer_easy', 'wer_tesseract', 'file_name']
-    columns_exist = all(col in df_metrics.columns for col in required_metrics_cols)
+    # 1. Line Chart CER per gambar
+    fig_cer, ax_cer = plt.subplots(figsize=(14, 5))
+    ax_cer.plot(x_indices, df_plot_metrics['cer_paddle'],    marker='o', color='steelblue',      label='PaddleOCR', linewidth=2)
+    ax_cer.plot(x_indices, df_plot_metrics['cer_easy'],      marker='s', color='tomato',         label='EasyOCR',   linewidth=2)
+    ax_cer.plot(x_indices, df_plot_metrics['cer_tesseract'], marker='^', color='mediumseagreen', label='Tesseract',  linewidth=2)
+    ax_cer.set_xticks(x_indices)
+    ax_cer.set_xticklabels(labels_x, rotation=45, ha='right', fontsize=8)
+    ax_cer.set_title('BQ1 — Character Error Rate (CER) per Gambar Struk', fontweight='bold')
+    ax_cer.set_ylabel('Character Error Rate')
+    ax_cer.grid(True, linestyle='--', alpha=0.5)
+    ax_cer.legend()
+    fig_cer.tight_layout()
+    st.pyplot(fig_cer)
+    plt.close(fig_cer)
 
-    if columns_exist:
-        # Menghapus baris duplikat per file agar plot garis mewakili runut file unik
-        df_metrics_unique = df_metrics.drop_duplicates(subset=['file_name']).sort_values('file_name').head(25) # Batasi 25 gambar agar label sumbu tidak menumpuk padat
-        x_indices = range(len(df_metrics_unique))
+    # 2. Line Chart WER per gambar
+    fig_wer, ax_wer = plt.subplots(figsize=(14, 5))
+    ax_wer.plot(x_indices, df_plot_metrics['wer_paddle'],    marker='o', color='steelblue',      label='PaddleOCR', linewidth=2)
+    ax_wer.plot(x_indices, df_plot_metrics['wer_easy'],      marker='s', color='tomato',         label='EasyOCR',   linewidth=2)
+    ax_wer.plot(x_indices, df_plot_metrics['wer_tesseract'], marker='^', color='mediumseagreen', label='Tesseract',  linewidth=2)
+    ax_wer.set_xticks(x_indices)
+    ax_wer.set_xticklabels(labels_x, rotation=45, ha='right', fontsize=8)
+    ax_wer.set_title('BQ1 — Word Error Rate (WER) per Gambar Struk', fontweight='bold')
+    ax_wer.set_ylabel('Word Error Rate')
+    ax_wer.grid(True, linestyle='--', alpha=0.5)
+    ax_wer.legend()
+    fig_wer.tight_layout()
+    st.pyplot(fig_wer)
+    plt.close(fig_wer)
 
-        # 1. Line Chart CER per gambar
-        fig_cer, ax_cer = plt.subplots(figsize=(14, 5))
-        ax_cer.plot(x_indices, df_metrics_unique['cer_paddle'],    marker='o', color='steelblue',      label='PaddleOCR', linewidth=2)
-        ax_cer.plot(x_indices, df_metrics_unique['cer_easy'],      marker='s', color='tomato',         label='EasyOCR',   linewidth=2)
-        ax_cer.plot(x_indices, df_metrics_unique['cer_tesseract'], marker='^', color='mediumseagreen', label='Tesseract',  linewidth=2)
-        ax_cer.set_xticks(x_indices)
-        ax_cer.set_xticklabels(df_metrics_unique['file_name'], rotation=45, ha='right', fontsize=8)
-        ax_cer.set_title('BQ1 — Character Error Rate (CER) per Gambar Struk', fontweight='bold')
-        ax_cer.set_ylabel('Character Error Rate')
-        ax_cer.grid(True, linestyle='--', alpha=0.5)
-        ax_cer.legend()
-        fig_cer.tight_layout()
-        st.pyplot(fig_cer)
-        plt.close(fig_cer)
-
-        # 2. Line Chart WER per gambar
-        fig_wer, ax_wer = plt.subplots(figsize=(14, 5))
-        ax_wer.plot(x_indices, df_metrics_unique['wer_paddle'],    marker='o', color='steelblue',      label='PaddleOCR', linewidth=2)
-        ax_wer.plot(x_indices, df_metrics_unique['wer_easy'],      marker='s', color='tomato',         label='EasyOCR',   linewidth=2)
-        ax_wer.plot(x_indices, df_metrics_unique['wer_tesseract'], marker='^', color='mediumseagreen', label='Tesseract',  linewidth=2)
-        ax_wer.set_xticks(x_indices)
-        ax_wer.set_xticklabels(df_metrics_unique['file_name'], rotation=45, ha='right', fontsize=8)
-        ax_wer.set_title('BQ1 — Word Error Rate (WER) per Gambar Struk', fontweight='bold')
-        ax_wer.set_ylabel('Word Error Rate')
-        ax_wer.grid(True, linestyle='--', alpha=0.5)
-        ax_wer.legend()
-        fig_wer.tight_layout()
-        st.pyplot(fig_wer)
-        plt.close(fig_wer)
-
-        # 3. Scatter Plot CER vs WER per model
-        fig_scatter, axes_scatter = plt.subplots(1, 3, figsize=(16, 5))
-        model_configs = [
-            ('PaddleOCR', 'cer_paddle',   'wer_paddle',   'steelblue'),
-            ('EasyOCR',   'cer_easy',      'wer_easy',      'tomato'),
-            ('Tesseract', 'cer_tesseract', 'wer_tesseract', 'mediumseagreen'),
-        ]
-        for ax, config in zip(axes_scatter, model_configs):
-            model_label, cer_col, wer_col, model_color = config
-            df_plot = df_metrics[[cer_col, wer_col]].dropna()
-            ax.scatter(df_plot[cer_col], df_plot[wer_col], color=model_color, alpha=0.7, s=80, edgecolor='white')
-            ax.set_title(f'CER vs WER — {model_label}', fontweight='bold')
-            ax.set_xlabel('CER')
-            ax.set_ylabel('WER')
-            ax.grid(True, linestyle='--', alpha=0.5)
-            
-        plt.suptitle('BQ1 — Hubungan Korelasi CER vs WER per Arsitektur Model', fontsize=14, fontweight='bold')
-        fig_scatter.tight_layout()
-        st.pyplot(fig_scatter)
-        plt.close(fig_scatter)
-    else:
-        st.info("💡 Grafik fluktuasi detail tidak dapat ditampilkan karena kolom 'cer_xx' atau 'wer_xx' belum lengkap di file detail evaluasi.")
+    # 3. Scatter Plot CER vs WER per model
+    fig_scatter, axes_scatter = plt.subplots(1, 3, figsize=(16, 5))
+    model_configs = [
+        ('PaddleOCR', 'cer_paddle',   'wer_paddle',   'steelblue'),
+        ('EasyOCR',   'cer_easy',      'wer_easy',      'tomato'),
+        ('Tesseract', 'cer_tesseract', 'wer_tesseract', 'mediumseagreen'),
+    ]
+    for ax, config in zip(axes_scatter, model_configs):
+        model_label, cer_col, wer_col, model_color = config
+        df_plot_scat = df_metrics[[cer_col, wer_col]].dropna()
+        ax.scatter(df_plot_scat[cer_col], df_plot_scat[wer_col], color=model_color, alpha=0.7, s=80, edgecolor='white')
+        ax.set_title(f'CER vs WER — {model_label}', fontweight='bold')
+        ax.set_xlabel('CER')
+        ax.set_ylabel('WER')
+        ax.grid(True, linestyle='--', alpha=0.5)
+        
+    plt.suptitle('BQ1 — Hubungan Korelasi CER vs WER per Arsitektur Model', fontsize=14, fontweight='bold')
+    fig_scatter.tight_layout()
+    st.pyplot(fig_scatter)
+    plt.close(fig_scatter)
 
     st.divider()
 
@@ -353,7 +322,7 @@ elif menu == "BQ1: Performa OCR":
     st.subheader("💡 Insight Analisis Pertanyaan Bisnis 1")
     st.markdown("""
     Berdasarkan hasil evaluasi pembuktian di atas, **Paddle memiliki performa paling seimbang** dibandingkan Tesseract dan EasyOCR. 
-    * **Paddle** memperoleh *success rate* tertinggi sebesar **73.33%** dan akurasi total harga tertinggi sebesar **26.09%**, meskipun waktu prosesnya sedikit lebih lama dibandingkan Tesseract.
+    * **Paddle** memperoleh *success rate* tertinggi sebesar **73.33%** and akurasi total harga tertinggi sebesar **26.09%**, meskipun waktu prosesnya sedikit lebih lama dibandingkan Tesseract.
     * **Tesseract** memiliki waktu proses paling cepat (**2.64 detik**), tetapi akurasi jumlah item dan total harga paling rendah sehingga kurang andal untuk ekstraksi data transaksi nyata.
     * **EasyOCR** memiliki akurasi jumlah item tertinggi (**33.5%**), namun waktu prosesnya sangat lambat (**18.73 detik**) dan akurasi total harga paling rendah (**14.0%**), sehingga tidak efisien untuk kebutuhan *deployment* sistem.
 
@@ -361,6 +330,7 @@ elif menu == "BQ1: Performa OCR":
 
     **Kesimpulan Dokumen:** Dengan demikian, **Paddle** resmi dipilih sebagai arsitektur OCR untuk proyek **NOPI (Nota Pintar)** ini karena memiliki titik temu keseimbangan terbaik (*trade-off*) antara keberhasilan parsing, akurasi nilai harga finansial, dan efisiensi waktu pemrosesan yang wajar.
     """)
+    
 # --- BQ2: ESTIMASI LABA ---
 elif menu == "BQ2: Estimasi Laba":
     st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
