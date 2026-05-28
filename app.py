@@ -311,14 +311,16 @@ elif menu == "BQ1: Performa OCR":
     **Insight:** Berdasarkan rata-rata CER dan WER, PaddleOCR memiliki tingkat kesalahan paling rendah dibandingkan dua model lainnya. PaddleOCR memperoleh CER sebesar 0.156 and WER sebesar 0.344, yang menunjukkan bahwa model ini lebih akurat dalam membaca karakter dan kata pada gambar struk. EasyOCR memiliki CER sebesar 0.499 and WER sebesar 0.973, sedangkan Tesseract memiliki error tertinggi dengan CER sebesar 0.529 and WER sebesar 1.306. Semakin rendah nilai CER dan WER, semakin baik kualitas hasil OCR, sehingga PaddleOCR menjadi model paling stabil dari sisi pembacaan teks.
     """)
 
-    # =========================================================================
-    # 📉 GRAFIK 4 & 5: LINE CHART CER & WER PER GAMBAR STRUK
+   # =========================================================================
+    # 📉 GRAFIK 4 & 5: LINE CHART CER & WER PER GAMBAR STRUK (SINKRONISASI MURNI)
     # =========================================================================
     st.divider()
     st.subheader("📉 Analisis Runut Waktu & Hubungan Error Rate Per Gambar Struk")
     
-    # Membatasi visualisasi runut 20 sampel unik agar tidak bertumpuk padat di halaman web
-    df_plot_metrics = df_metrics.drop_duplicates(subset=['file_name']).sort_values('file_name').head(20)
+    # SINKRONISASI COLA: Mengambil baris data asli langsung tanpa sort abjad dan tanpa drop_duplicates
+    # Sesuaikan angka .head(30) di bawah ini dengan jumlah baris yang tampil di grafik Colab kamu
+    df_plot_metrics = df_metrics.head(30).copy() 
+    
     x_indices = range(len(df_plot_metrics))
     labels_x = df_plot_metrics['file_name'].tolist()
 
@@ -361,7 +363,7 @@ elif menu == "BQ1: Performa OCR":
     st.info("""
     **Insight:** Line chart WER menunjukkan pola yang mirip dengan CER, yaitu PaddleOCR memiliki error kata yang paling rendah dan stabil pada sebagian besar gambar. Tesseract memiliki nilai WER yang tinggi pada banyak struk, bahkan mencapai lebih dari 2.0 pada salah satu gambar, yang menunjukkan banyak kata terbaca salah atau tidak sesuai dengan ground truth. EasyOCR juga memiliki beberapa lonjakan WER, terutama pada struk tertentu dengan struktur teks yang lebih sulit. Hal ini menunjukkan bahwa kesalahan pembacaan karakter dapat berdampak langsung pada kesalahan pembacaan kata.
     """)
-
+    
     # =========================================================================
     # 📉 GRAFIK 6: SCATTER PLOT CER VS WER PER MODEL
     # =========================================================================
