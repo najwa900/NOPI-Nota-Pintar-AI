@@ -398,7 +398,7 @@ elif menu == "BQ1: Performa OCR":
     Secara keseluruhan, OCR mampu mengekstrak informasi dari struk secara otomatis, tetapi performanya masih berbeda-beda pada setiap model. PaddleOCR menjadi model terbaik karena memiliki success rate tertinggi, CER terendah, dan WER terendah, dengan waktu proses yang masih layak untuk deployment. Tesseract unggul dari sisi kecepatan, tetapi kurang stabil dalam membaca informasi transaksi. EasyOCR cukup baik dalam mendeteksi jumlah item, tetapi terlalu lambat dan kurang akurat dalam membaca total harga.
     Tantangan utama pada BQ1 adalah ekstraksi informasi numerik seperti total harga, karena struk memiliki banyak angka, layout tabel, dan format yang tidak selalu rapi.
     
-    **Kesimpulan Dokumen:** Dengan demikian, **Paddle** resmi dipilih sebagai arsitektur OCR untuk proyek **NOPI (Nota Pintar)** ini karena memiliki titik temu keseimbangan terbaik (*trade-off*) antara keberhasilan parsing, akurasi nilai harga finansial, dan efisiensi waktu pemrosesan yang wajar.
+    **Kesimpulan:** Dengan demikian, **Paddle** resmi dipilih sebagai arsitektur OCR untuk proyek **NOPI (Nota Pintar)** ini karena memiliki titik temu keseimbangan terbaik (*trade-off*) antara keberhasilan parsing, akurasi nilai harga finansial, dan efisiensi waktu pemrosesan yang wajar.
     """)
     
 # --- BQ2: ESTIMASI LABA ---
@@ -534,6 +534,13 @@ elif menu == "BQ3: Laporan Transaksi":
         st.pyplot(fig_a)
         plt.close(fig_a)
 
+        # INSIGHT GRAFIK A
+        st.info("""
+        **Insight:** Distribusi harga satuan menunjukkan bahwa sebagian besar item berada pada rentang harga rendah hingga menengah, dengan median harga sebesar Rp 15.145. 
+        Namun, terdapat beberapa item dengan harga sangat tinggi hingga lebih dari Rp 300.000, sehingga distribusi harga terlihat miring ke kanan. 
+        Dari sisi jumlah barang, mayoritas baris transaksi berisi 1 item, yang menunjukkan bahwa pola transaksi pada dataset lebih banyak berupa pembelian satuan dibandingkan pembelian grosir.
+        """)
+
     with col_chartB:
         st.markdown("**B. Segmentasi Item Berdasarkan Rentang Harga**")
         kat_order = [
@@ -564,7 +571,15 @@ elif menu == "BQ3: Laporan Transaksi":
         st.pyplot(fig_b)
         plt.close(fig_b)
 
+        # INSIGHT GRAFIK B
+        st.info("""
+        **Insight:** Segmentasi kategori harga menunjukkan bahwa item paling banyak berada pada kategori Murah (5–20rb) sebanyak 90 item, diikuti oleh kategori Sedang (20–50rb) sebanyak 44 item dan Sangat Murah (≤5rb) sebanyak 40 item. 
+        Sementara itu, kategori Mahal (50–100rb) dan Sangat Mahal (>100rb) masing-masing hanya berisi 9 item. 
+        Hal ini menunjukkan bahwa transaksi pada dataset didominasi oleh produk dengan harga terjangkau, sehingga segmentasi ini dapat membantu pelaku usaha memahami komposisi harga produk dalam transaksi.
+        """)
+
     # Baris baru melebar ke bawah untuk meninjau audit 10 Struk Teratas
+    st.divider()
     st.markdown("**C. Pengeluaran Teratas Berdasarkan Berkas Struk Nota Belanja Valid**")
     
     # 1. JALANKAN AGREGASI PER STRUK/NOTA (PERSIS SEPERTI DI COLAB)
@@ -579,7 +594,6 @@ elif menu == "BQ3: Laporan Transaksi":
     ).reset_index().sort_values('total_transaksi', ascending=False)
 
     # 2. FILTER STRUK VALID YANG IDENTIK DENGAN LOGIKA NOTEBOOK
-    # Konversi tanggal_valid ke string dulu agar aman dari bug tipe data di server Streamlit
     if 'tanggal_valid' in laporan_struk.columns:
         cond_date_c = laporan_struk['tanggal_valid'].astype(str).str.lower().str.contains('true|1', na=False)
     else:
@@ -610,7 +624,7 @@ elif menu == "BQ3: Laporan Transaksi":
         fig_c, ax_c = plt.subplots(figsize=(10, 5))
         bars3 = ax_c.barh(
             top_struk['filename'],
-            top_struk['total_transaksi'], # Gunakan total_transaksi hasil sum nota, bukan total_harga_item ritel
+            top_struk['total_transaksi'],
             color='mediumpurple',
             alpha=0.85,
             edgecolor='white'
@@ -625,18 +639,21 @@ elif menu == "BQ3: Laporan Transaksi":
     else:
         st.warning("Tidak ada data transaksi valid untuk ditampilkan pada grafik pengeluaran teratas.")
 
+    # INSIGHT GRAFIK C
+    st.info("""
+    **Insight:** Visualisasi top struk menunjukkan bahwa data transaksi hasil OCR dapat diagregasi menjadi laporan ringkas per struk, seperti nama toko, tanggal transaksi, jumlah item, total quantity, total transaksi, dan estimasi laba. 
+    Struk dengan total transaksi tertinggi berasal dari Tokosukatam sebesar Rp 353.000 dengan estimasi laba Rp 70.600 menggunakan asumsi margin 20%. 
+    Data seperti ini dapat membantu pelaku usaha melihat transaksi terbesar, memperkirakan omzet, dan menghitung estimasi keuntungan secara lebih praktis.
+    """)
+
     st.divider()
 
     # ==========================================
     # LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
     # ==========================================
-   # ==========================================
-    # LAPORAN TABEL TERSTRUKTUR DIBUNGKUS EXPANDER
-    # ==========================================
     with st.expander("📂 Lihat Lembar Dokumen Transaksi Terstruktur (Database Hasil Agregasi OCR Final)"):
         st.write("Daftar 10 baris teratas nota belanja hasil pembacaan database terstruktur bersih (Sesuai Hasil Colab):")
         
-        # Kolom acuan yang dicari disesuaikan dengan isi tabel laporan_struk_filtered di Colab
         kolom_tabel = [
             'filename', 
             'nama_toko', 
@@ -649,7 +666,6 @@ elif menu == "BQ3: Laporan Transaksi":
         ]
         kolom_tabel_ada = [c for c in kolom_tabel if c in laporan_struk_filtered.columns]
         
-        # MURNI MEMANGGIL laporan_struk_filtered YANG SUDAH DIURUTKAN BERDASARKAN TOTAL TRANSAKSI TERBESAR
         st.dataframe(
             laporan_struk_filtered[kolom_tabel_ada].head(10),
             use_container_width=True
@@ -658,19 +674,19 @@ elif menu == "BQ3: Laporan Transaksi":
     st.divider()
 
     # ==========================================
-    # INSIGHT RESMI BISNIS
+    # KESIMPULAN GLOBAL DAN LIMITASI BISNIS
     # ==========================================
-    st.subheader("💡 Insight Analisis Pertanyaan Bisnis 3")
+    st.subheader("💡 Kesimpulan Analisis Pertanyaan Bisnis 3")
     st.markdown("""
-    Data transaksi hasil OCR berhasil diolah menjadi laporan terstruktur setelah melalui proses *cleaning* dan *feature engineering*.
+    **Secara keseluruhan, data transaksi hasil OCR dapat diolah menjadi laporan bisnis yang lebih terstruktur melalui proses cleaning, segmentasi harga, dan agregasi per struk.** Informasi yang sebelumnya berupa teks acak hasil ekstraksi OCR berhasil ditransformasikan menjadi entitas data analitis yang berharga, seperti bentuk grafik distribusi harga produk, pemetaan pola jumlah pembelian komoditas harian, pengelompokan kategori harga, total nilai transaksi bersih, hingga nilai estimasi laba secara real-time.
+    
+    Dengan menerapkan skema *feature engineering* berupa asumsi **margin tetap sebesar 20%**, sistem dapat menghasilkan estimasi laba bersih secara otomatis tanpa membebankan pelaku usaha untuk menginput atau mencocokkan harga beli produk satu per satu secara manual. Pendekatan ini sangat menunjang digitalisasi pembukuan keuangan praktis serta mempercepat proses pengambilan keputusan bisnis bagi kelompok pelaku UMKM.
 
-    Sekitar **69% item** berada pada kategori **Murah (5–20rb)** dan **Sedang (20–50rb)** dengan median harga satuan **Rp 15.145**, mencerminkan pola belanja kebutuhan sehari-hari. Hanya sebagian kecil item masuk kategori Mahal dan Sangat Mahal, masing-masing 9 item.
-
-    **Mayoritas transaksi bersifat satuan (1 unit per baris)**, bukan grosir. Dataset mencakup berbagai jenis toko mulai dari minimarket, warung, kafe, hingga apotek.
-
-    Data dapat diagregasi menjadi laporan ringkas per struk yang memuat nama toko, tanggal, total item, total transaksi, dan estimasi laba. Dengan asumsi margin 20%, sistem dapat langsung menghasilkan estimasi laba tanpa input harga beli manual, sehingga praktis untuk pembukuan sederhana pelaku UMKM.
-
-    > **Catatan Teknis Penulisan:** Beberapa nama toko dan nilai total transaksi masih mengandung *noise* OCR residual. Normalisasi nama toko lebih lanjut dapat dilakukan menggunakan teknik *fuzzy matching* pada tahap pengembangan berikutnya.
+    ---
+    
+    ⚠️ **Catatan Teknis Penulisan & Batasan Operasional:**
+    * **Noise OCR Residual:** Beberapa representasi nama toko pada database transaksional terstruktur masih mengandung *noise* residual pembacaan akibat kualitas fisik cetakan struk asli yang pudar. Implementasi algoritma pencocokan tingkat teks tingkat lanjut seperti *Fuzzy Matching* dapat diajukan pada tahap pengembangan riset berikutnya.
+    * **Threshold Outliers:** Pada visualisasi berkas nota belanja teratas (Grafik C), transaksi dengan nominal total di atas **Rp 500.000** sengaja dieliminasi secara otomatis dari sistem. Batasan ini diterapkan sebagai langkah mitigasi (*safety guard*) karena data di atas ambang batas tersebut memiliki probabilitas tinggi mengandung *noise* pembacaan digit angka OCR yang ekstrem, sehingga pemotongan ini diperlukan agar visualisasi laporan finansial tetap bersifat representatif terhadap kondisi bisnis riil.
     """)
 
 # Footer Global
