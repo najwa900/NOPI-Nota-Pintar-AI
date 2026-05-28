@@ -183,6 +183,9 @@ elif menu == "BQ1: Performa OCR":
 
     st.divider()
 
+    # =========================================================================
+    # 📊 GRAFIK 1: GRID METRICS (BAR CHART)
+    # =========================================================================
     st.subheader("📊 Komparasi Performa 3 Model OCR (Grid Metrics)")
 
     models = df_evaluasi['Nama Model']
@@ -216,8 +219,16 @@ elif menu == "BQ1: Performa OCR":
     st.pyplot(fig)
     plt.close(fig)
 
+    # Insight Grid Metrics
+    st.info("""
+    **Insight:** PaddleOCR menunjukkan performa paling seimbang dibandingkan Tesseract dan EasyOCR. PaddleOCR memiliki success rate tertinggi sebesar 73.33% dengan rata-rata waktu proses 5.26 detik, sehingga cukup baik untuk kebutuhan ekstraksi otomatis. Tesseract menjadi model tercepat dengan waktu proses 2.64 detik, tetapi akurasi jumlah item dan total harga masih lebih rendah. EasyOCR memiliki akurasi jumlah item tertinggi sebesar 33.47%, tetapi waktu prosesnya paling lama, yaitu 18.73 detik, sehingga kurang efisien untuk deployment. Secara umum, akurasi total harga ketiga model masih rendah, sehingga ekstraksi angka dan struktur harga pada struk masih menjadi tantangan utama.
+    """)
+
     st.divider()
 
+    # =========================================================================
+    # 🍕 GRAFIK 2: STATUS PARSING (PIE CHART)
+    # =========================================================================
     st.subheader("🍕 Distribusi Status Parsing per Model OCR")
 
     status_counts = df_detail.groupby(['Model', 'Status']).size().unstack(fill_value=0)
@@ -255,13 +266,18 @@ elif menu == "BQ1: Performa OCR":
     st.pyplot(fig2)
     plt.close(fig2)
 
+    # Insight Status Parsing
+    st.info("""
+    **Insight:** Distribusi status parsing menunjukkan bahwa sebagian besar hasil ekstraksi OCR masih berada pada kategori Sebagian, bukan Sempurna. PaddleOCR memiliki proporsi hasil parsing sebagian tertinggi sebesar 73.3% and gagal total sebesar 26.7%, sehingga menjadi model dengan keberhasilan parsing terbaik. Tesseract memiliki hasil parsing sebagian sebesar 60.0% and gagal total sebesar 40.0%. EasyOCR memiliki sedikit hasil parsing sempurna sebesar 3.3%, tetapi gagal totalnya paling tinggi, yaitu 43.3%. Hal ini menunjukkan bahwa meskipun OCR dapat membaca sebagian isi struk, hasil parsing masih belum sepenuhnya konsisten untuk seluruh informasi transaksi.
+    """)
+
     # =========================================================================
-    # 📈 NEW METRIC: BAR CHART PERBANDINGAN RATA-RATA CER & WER
+    # 📊 GRAFIK 3: NEW METRIC - KOMPARASI RATA-RATA CER & WER (BAR CHART)
     # =========================================================================
     st.divider()
     st.subheader("📊 Komparasi Akurasi Kesalahan Teks (Rata-rata CER & WER)")
 
-    # Membuat DataFrame ringkasan rata-rata berdasarkan nilai yang valid
+    # Data ringkasan rata-rata murni dari notebook evaluasi
     df_avg = pd.DataFrame({
         'Model': ['PaddleOCR', 'EasyOCR', 'Tesseract'],
         'Avg CER': [0.156, 0.499, 0.529],
@@ -292,19 +308,16 @@ elif menu == "BQ1: Performa OCR":
 
     # Insight Rata-rata CER & WER
     st.info("""
-    **Insight:** Berdasarkan rata-rata CER dan WER, PaddleOCR memiliki tingkat kesalahan paling rendah dibandingkan dua model lainnya. 
-    PaddleOCR memperoleh CER sebesar 0.156 dan WER sebesar 0.344, yang menunjukkan bahwa model ini lebih akurat dalam membaca karakter dan kata pada gambar struk. 
-    EasyOCR memiliki CER sebesar 0.499 dan WER sebesar 0.973, sedangkan Tesseract memiliki error tertinggi dengan CER sebesar 0.529 dan WER sebesar 1.306. 
-    Semakin rendah nilai CER dan WER, semakin baik kualitas hasil OCR, sehingga PaddleOCR menjadi model paling stabil dari sisi pembacaan teks.
+    **Insight:** Berdasarkan rata-rata CER dan WER, PaddleOCR memiliki tingkat kesalahan paling rendah dibandingkan dua model lainnya. PaddleOCR memperoleh CER sebesar 0.156 and WER sebesar 0.344, yang menunjukkan bahwa model ini lebih akurat dalam membaca karakter dan kata pada gambar struk. EasyOCR memiliki CER sebesar 0.499 and WER sebesar 0.973, sedangkan Tesseract memiliki error tertinggi dengan CER sebesar 0.529 and WER sebesar 1.306. Semakin rendah nilai CER dan WER, semakin baik kualitas hasil OCR, sehingga PaddleOCR menjadi model paling stabil dari sisi pembacaan teks.
     """)
 
     # =========================================================================
-    # 📈 LINE CHART CER, WER & SCATTER PLOT PER GAMBAR
+    # 📉 GRAFIK 4 & 5: LINE CHART CER & WER PER GAMBAR STRUK
     # =========================================================================
     st.divider()
     st.subheader("📉 Analisis Runut Waktu & Hubungan Error Rate Per Gambar Struk")
     
-    # Ambil 20 data teratas agar sumbu X grafiknya rapi dan tidak padat bertumpuk di web
+    # Membatasi visualisasi runut 20 sampel unik agar tidak bertumpuk padat di halaman web
     df_plot_metrics = df_metrics.drop_duplicates(subset=['file_name']).sort_values('file_name').head(20)
     x_indices = range(len(df_plot_metrics))
     labels_x = df_plot_metrics['file_name'].tolist()
@@ -326,10 +339,7 @@ elif menu == "BQ1: Performa OCR":
 
     # Insight Line Chart CER
     st.info("""
-    **Insight:** Line chart CER menunjukkan bahwa PaddleOCR memiliki nilai error karakter yang paling rendah dan paling stabil pada hampir seluruh gambar struk. 
-    EasyOCR and Tesseract cenderung memiliki fluktuasi error yang lebih besar, terutama pada beberapa gambar dengan layout yang lebih kompleks. 
-    EasyOCR bahkan mencapai nilai CER mendekati 1.0 pada salah satu struk, yang menunjukkan banyak karakter gagal terbaca dengan benar. 
-    Hasil ini menunjukkan bahwa PaddleOCR lebih konsisten dalam membaca karakter, sedangkan EasyOCR dan Tesseract lebih sensitif terhadap kualitas gambar dan variasi layout struk.
+    **Insight:** Line chart CER menunjukkan bahwa PaddleOCR memiliki nilai error karakter yang paling rendah dan paling stabil pada hampir seluruh gambar struk. EasyOCR dan Tesseract cenderung memiliki fluktuasi error yang lebih besar, terutama pada beberapa gambar dengan layout yang lebih kompleks. EasyOCR bahkan mencapai nilai CER mendekati 1.0 pada salah satu struk, yang menunjukkan banyak karakter gagal terbaca dengan benar. Hasil ini menunjukkan bahwa PaddleOCR lebih konsisten dalam membaca karakter, sedangkan EasyOCR dan Tesseract lebih sensitif terhadap kualitas gambar dan variasi layout struk.
     """)
 
     # 2. Line Chart WER per gambar
@@ -349,13 +359,12 @@ elif menu == "BQ1: Performa OCR":
 
     # Insight Line Chart WER
     st.info("""
-    **Insight:** Line chart WER menunjukkan pola yang mirip dengan CER, yaitu PaddleOCR memiliki error kata yang paling rendah dan stabil pada sebagian besar gambar. 
-    Tesseract memiliki nilai WER yang tinggi pada banyak struk, bahkan mencapai lebih dari 2.0 pada salah satu gambar, yang menunjukkan banyak kata terbaca salah atau tidak sesuai dengan ground truth. 
-    EasyOCR juga memiliki beberapa lonjakan WER, terutama pada struk tertentu dengan struktur teks yang lebih sulit. 
-    Hal ini menunjukkan bahwa kesalahan pembacaan karakter dapat berdampak langsung pada kesalahan pembacaan kata.
+    **Insight:** Line chart WER menunjukkan pola yang mirip dengan CER, yaitu PaddleOCR memiliki error kata yang paling rendah dan stabil pada sebagian besar gambar. Tesseract memiliki nilai WER yang tinggi pada banyak struk, bahkan mencapai lebih dari 2.0 pada salah satu gambar, yang menunjukkan banyak kata terbaca salah atau tidak sesuai dengan ground truth. EasyOCR juga memiliki beberapa lonjakan WER, terutama pada struk tertentu dengan struktur teks yang lebih sulit. Hal ini menunjukkan bahwa kesalahan pembacaan karakter dapat berdampak langsung pada kesalahan pembacaan kata.
     """)
 
-    # 3. Scatter Plot CER vs WER per model
+    # =========================================================================
+    # 📉 GRAFIK 6: SCATTER PLOT CER VS WER PER MODEL
+    # =========================================================================
     fig_scatter, axes_scatter = plt.subplots(1, 3, figsize=(16, 5))
     model_configs = [
         ('PaddleOCR', 'cer_paddle',   'wer_paddle',   'steelblue'),
@@ -378,16 +387,14 @@ elif menu == "BQ1: Performa OCR":
 
     # Insight Scatter Plot
     st.info("""
-    **Insight:** Scatter plot CER dan WER menunjukkan adanya hubungan positif antara kesalahan karakter dan kesalahan kata. 
-    Pada PaddleOCR, titik data cenderung berada pada area CER dan WER yang lebih rendah, sehingga menunjukkan hasil pembacaan yang lebih stabil. 
-    EasyOCR memiliki sebaran error yang lebih lebar, menandakan performanya kurang konsisten antar gambar. 
-    Tesseract memiliki nilai WER yang tinggi meskipun beberapa nilai CER tidak selalu paling tinggi, sehingga menunjukkan bahwa kesalahan kecil pada karakter dapat menyebabkan struktur kata menjadi sangat berbeda. 
-    Secara umum, semakin tinggi CER, semakin tinggi juga WER yang dihasilkan.
+    **Insight:** Scatter plot CER dan WER menunjukkan adanya hubungan positif antara kesalahan karakter dan kesalahan kata. Pada PaddleOCR, titik data cenderung berada pada area CER dan WER yang lebih rendah, sehingga menunjukkan hasil pembacaan yang lebih stabil. EasyOCR memiliki sebaran error yang lebih lebar, menandakan performanya kurang konsisten antar gambar. Tesseract memiliki nilai WER yang tinggi meskipun beberapa nilai CER tidak selalu paling tinggi, sehingga menunjukkan bahwa kesalahan kecil pada karakter dapat menyebabkan struktur kata menjadi sangat berbeda. Secara umum, semakin tinggi CER, semakin tinggi juga WER yang dihasilkan.
     """)
 
     st.divider()
 
-    # 4. BAGIAN INSIGHT GLOBAL BQ1
+    # =========================================================================
+    # 💡 KESIMPULAN AKHIR GLOBAL BQ1
+    # =========================================================================
     st.subheader("💡 Kesimpulan Analisis Pertanyaan Bisnis 1")
     st.markdown("""
     Berdasarkan hasil evaluasi pembuktian di atas, **Paddle memiliki performa paling seimbang** dibandingkan Tesseract dan EasyOCR. 
