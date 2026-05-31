@@ -167,8 +167,8 @@ elif menu == "Ringkasan & EDA":
 
 # --- CNN MODEL: KLASIFIKASI CITRA ---
 elif menu == "CNN Model: Klasifikasi Citra":
-    st.header("🧠 CNN_Model_ReceiptClassification: Penyaringan Dokumen Struk Belanja")
-    st.markdown("Sebelum data diolah oleh arsitektur OCR, model CNN bertindak sebagai *gatekeeper* untuk mendeteksi dan mengklasifikasikan apakah dokumen yang diunggah berupa struk belanja murni atau citra *non-struk*.")
+    st.header(" CNN Model Receipt Classification: Penyaringan Dokumen Struk Belanja")
+    st.markdown("Sebelum data diolah oleh arsitektur OCR, model CNN bertindak sebagai *gatekeeper* untuk mendeteksi dan mengklasifikasikan apakah dokumen yang diunggah berupa struk belanja atau dokumen *non-struk*.")
 
     # ==========================================
     # DATA METRIK HISTORY TRAINING CNN REAL (LOG ASLI DARI CELL 21 NOTEBOOK)
@@ -225,7 +225,7 @@ elif menu == "CNN Model: Klasifikasi Citra":
     
 # --- BQ1: PERFORMA OCR ---
 elif menu == "BQ1: Performa OCR":
-    st.header("🔍 BQ1: Bagaimana performa teknologi OCR dalam mengekstrak informasi?")
+    st.header(" BQ1: Bagaimana performa teknologi OCR dalam mengekstrak informasi?")
 
     col1, col2 = st.columns([3, 2])
     with col1:
@@ -469,7 +469,7 @@ elif menu == "BQ1: Performa OCR":
     
 # --- BQ2: ESTIMASI LABA ---
 elif menu == "BQ2: Estimasi Laba":
-    st.header("💰 BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
+    st.header(" BQ2: Bagaimana UMKM mengetahui estimasi laba secara efisien?")
     st.markdown("Sistem menampilkan perkiraan laba berdasarkan data terstruktur hasil ekstraksi OCR yang telah melalui proses *cleaning* akhir.")
 
     sample_file = 'primer_0079.jpg'
@@ -532,7 +532,7 @@ Dengan pendekatan ini, sistem menjadi lebih praktis bagi pelaku UMKM yang belum 
 
 # --- BQ3: LAPORAN TRANSAKSI ---
 elif menu == "BQ3: Laporan Transaksi":
-    st.header("📋 BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur untuk mendukung pengambilan keputusan bisnis?")
+    st.header(" BQ3: Bagaimana data OCR diolah menjadi laporan terstruktur untuk mendukung pengambilan keputusan bisnis?")
     st.markdown("Mentransformasikan hasil ekstraksi teks acak dokumen nota belanja menjadi laporan finansial terstruktur untuk menunjang strategi bisnis UMKM.")
     
     import matplotlib.ticker as mticker
