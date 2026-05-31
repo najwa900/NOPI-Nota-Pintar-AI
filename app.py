@@ -171,24 +171,24 @@ elif menu == "CNN Model: Klasifikasi Citra":
     st.markdown("Sebelum data diolah oleh arsitektur OCR, model CNN bertindak sebagai *gatekeeper* untuk mendeteksi dan mengklasifikasikan apakah dokumen yang diunggah berupa struk belanja murni atau citra *non-struk*.")
 
     # ==========================================
-    # DATA METRIK HISTORY TRAINING CNN (100% SINKRON NOTEBOOK)
+    # DATA METRIK HISTORY TRAINING CNN REAL (LOG ASLI DARI CELL 21 NOTEBOOK)
     # ==========================================
-    # Menghitung rentang 10 Epochs sesuai rumus: range(1, len(history2.history['accuracy']) + 1)
-    epochs_count = 10 
+    # Model kamu berhenti di epoch 11 berdasarkan callback 'Target tercapai, training dihentikan!'
+    epochs_count = 11 
     epochs = range(1, epochs_count + 1)
     
-    # Rekonstruksi struktur data dict history2.history secara presisi sesuai kurva image_a46223.png
+    # Kunci log metrik numerik murni dari notebook CNN_Model_ReceiptClassification.ipynb
     history2 = {
         'history': {
-            'accuracy':     [0.552, 0.781, 0.865, 0.912, 0.938, 0.954, 0.965, 0.973, 0.979, 0.984],
-            'val_accuracy': [0.712, 0.834, 0.892, 0.915, 0.928, 0.932, 0.936, 0.935, 0.939, 0.941],
-            'loss':         [1.210, 0.582, 0.384, 0.271, 0.201, 0.155, 0.122, 0.098, 0.081, 0.068],
-            'val_loss':     [0.680, 0.421, 0.315, 0.268, 0.242, 0.231, 0.228, 0.234, 0.229, 0.225]
+            'accuracy':     [0.8666, 0.9435, 0.9610, 0.9674, 0.9796, 0.9755, 0.9744, 0.9796, 0.9860, 0.9872, 0.9901],
+            'val_accuracy': [0.9400, 0.9650, 0.9700, 0.9250, 0.9750, 0.9900, 0.9750, 0.9700, 0.9850, 0.9850, 0.9850],
+            'loss':         [0.3944, 0.2163, 0.1698, 0.1500, 0.1309, 0.1246, 0.1232, 0.1188, 0.0896, 0.0922, 0.0841],
+            'val_loss':     [0.2344, 0.1732, 0.1803, 0.2115, 0.1251, 0.0876, 0.1187, 0.1046, 0.1823, 0.1654, 0.1409]
         }
     }
 
     # ==========================================
-    # VISUALISASI PERSIS KODE COLAB (DENGAN RECONSTRUCTION LOCK)
+    # VISUALISASI PERSIS KODE CELL 23 COLAB (DENGAN CANVAS LOCK)
     # ==========================================
     st.subheader("📈 Kurva Evaluasi Training Model CNN")
     
@@ -201,7 +201,7 @@ elif menu == "CNN Model: Klasifikasi Citra":
     axes_cnn[0].set_title('Model Accuracy', fontweight='bold')
     axes_cnn[0].set_xlabel('Epoch')
     axes_cnn[0].set_ylabel('Accuracy')
-    axes_cnn[0].set_xticks(epochs)  # Menampilkan sumbu X angka bulat 1-10 tanpa pecahan
+    axes_cnn[0].set_xticks(epochs)  # Menampilkan sumbu X angka bulat 1-11 secara rapi
     axes_cnn[0].grid(True, linestyle='--', alpha=0.5)
     axes_cnn[0].legend(['Train', 'Validation'], loc='lower right')
 
@@ -211,7 +211,7 @@ elif menu == "CNN Model: Klasifikasi Citra":
     axes_cnn[1].set_title('Model Loss', fontweight='bold')
     axes_cnn[1].set_xlabel('Epoch')
     axes_cnn[1].set_ylabel('Loss')
-    axes_cnn[1].set_xticks(epochs)  # Menampilkan sumbu X angka bulat 1-10 tanpa pecahan
+    axes_cnn[1].set_xticks(epochs)  # Menampilkan sumbu X angka bulat 1-11 secara rapi
     axes_cnn[1].grid(True, linestyle='--', alpha=0.5)
     axes_cnn[1].legend(['Train', 'Validation'], loc='upper right')
 
