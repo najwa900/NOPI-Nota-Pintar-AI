@@ -167,33 +167,35 @@ elif menu == "Ringkasan & EDA":
 
 # --- CNN MODEL: KLASIFIKASI CITRA ---
 elif menu == "CNN Model: Klasifikasi Citra":
-    st.header(" CNN Model Receipt Classification: Penyaringan Dokumen Struk Belanja")
+    st.header("🧠 CNN Model Receipt Classification: Penyaringan Dokumen Struk Belanja")
     st.markdown("Sebelum data diolah oleh arsitektur OCR, model CNN bertindak sebagai *gatekeeper* untuk mendeteksi dan mengklasifikasikan apakah dokumen yang diunggah berupa struk belanja atau dokumen *non-struk*.")
 
     # ==========================================
-    # DATA METRIK HISTORY TRAINING CNN REAL (LOG ASLI DARI CELL 21 NOTEBOOK)
+    # DATA METRIK HISTORY TRAINING CNN REAL (LENGKAP: ACCURACY, LOSS, MAE)
     # ==========================================
-    # Model kamu berhenti di epoch 11 berdasarkan callback 'Target tercapai, training dihentikan!'
+    # Model berhenti di epoch 11 berdasarkan callback 'Target tercapai, training dihentikan!'
     epochs_count = 11 
-    epochs = range(1, epochs_count + 1)
+    epochs = list(range(1, epochs_count + 1))
     
-    # Kunci log metrik numerik murni dari notebook CNN_Model_ReceiptClassification.ipynb
+    # Kunci log metrik numerik murni dari notebook CNN_Model_ReceiptClassification.ipynb (Termasuk MAE)
     history2 = {
         'history': {
             'accuracy':     [0.8666, 0.9435, 0.9610, 0.9674, 0.9796, 0.9755, 0.9744, 0.9796, 0.9860, 0.9872, 0.9901],
             'val_accuracy': [0.9400, 0.9650, 0.9700, 0.9250, 0.9750, 0.9900, 0.9750, 0.9700, 0.9850, 0.9850, 0.9850],
             'loss':         [0.3944, 0.2163, 0.1698, 0.1500, 0.1309, 0.1246, 0.1232, 0.1188, 0.0896, 0.0922, 0.0841],
-            'val_loss':     [0.2344, 0.1732, 0.1803, 0.2115, 0.1251, 0.0876, 0.1187, 0.1046, 0.1823, 0.1654, 0.1409]
+            'val_loss':     [0.2344, 0.1732, 0.1803, 0.2115, 0.1251, 0.0876, 0.1187, 0.1046, 0.1823, 0.1654, 0.1409],
+            'mae':          [0.1884, 0.0890, 0.0613, 0.0558, 0.0419, 0.0390, 0.0359, 0.0359, 0.0212, 0.0229, 0.0176],
+            'val_mae':      [0.0928, 0.0459, 0.0707, 0.0761, 0.0286, 0.0249, 0.0270, 0.0268, 0.0238, 0.0202, 0.0171]
         }
     }
 
     # ==========================================
-    # VISUALISASI PERSIS KODE CELL 23 COLAB (DENGAN CANVAS LOCK)
+    # VISUALISASI PERSIS KODE SUBPLOT 1X3 COLAB (DENGAN CANVAS LOCK)
     # ==========================================
-    st.subheader("📈 Kurva Evaluasi Training Model CNN")
+    st.subheader("📈 Kurva Evaluasi Training Model CNN (Accuracy, Loss, & MAE)")
     
-    # Mengunci ukuran canvas (12, 5) persis seperti plt.figure(figsize=(12, 5)) di Colab
-    fig_cnn, axes_cnn = plt.subplots(1, 2, figsize=(12, 5))
+    # Mengunci ukuran canvas (18, 5) dengan 3 subplot mendatar persis seperti plt.subplots(1, 3, figsize=(18, 5))
+    fig_cnn, axes_cnn = plt.subplots(1, 3, figsize=(18, 5))
 
     # === ACCURACY (Subplot 1) ===
     axes_cnn[0].plot(epochs, history2['history']['accuracy'], marker='o', markersize=5, linewidth=1.5, color='#1f77b4', label='Train')
@@ -201,9 +203,9 @@ elif menu == "CNN Model: Klasifikasi Citra":
     axes_cnn[0].set_title('Model Accuracy', fontweight='bold')
     axes_cnn[0].set_xlabel('Epoch')
     axes_cnn[0].set_ylabel('Accuracy')
-    axes_cnn[0].set_xticks(epochs)  # Menampilkan sumbu X angka bulat 1-11 secara rapi
-    axes_cnn[0].grid(True, linestyle='--', alpha=0.5)
-    axes_cnn[0].legend(['Train', 'Validation'], loc='lower right')
+    axes_cnn[0].set_xticks(epochs)
+    axes_cnn[0].grid(True, linestyle='--', alpha=0.6)
+    axes_cnn[0].legend()
 
     # === LOSS (Subplot 2) ===
     axes_cnn[1].plot(epochs, history2['history']['loss'], marker='o', markersize=5, linewidth=1.5, color='#1f77b4', label='Train')
@@ -211,16 +213,27 @@ elif menu == "CNN Model: Klasifikasi Citra":
     axes_cnn[1].set_title('Model Loss', fontweight='bold')
     axes_cnn[1].set_xlabel('Epoch')
     axes_cnn[1].set_ylabel('Loss')
-    axes_cnn[1].set_xticks(epochs)  # Menampilkan sumbu X angka bulat 1-11 secara rapi
-    axes_cnn[1].grid(True, linestyle='--', alpha=0.5)
-    axes_cnn[1].legend(['Train', 'Validation'], loc='upper right')
+    axes_cnn[1].set_xticks(epochs)
+    axes_cnn[1].grid(True, linestyle='--', alpha=0.6)
+    axes_cnn[1].legend()
+
+    # === MAE (Subplot 3 - GRAFIK BARU YANG DITAMBAHKAN) ===
+    axes_cnn[2].plot(epochs, history2['history']['mae'], marker='o', markersize=5, linewidth=1.5, color='#1f77b4', label='Train')
+    axes_cnn[2].plot(epochs, history2['history']['val_mae'], marker='o', markersize=5, linewidth=1.5, color='#ff7f0e', label='Validation')
+    axes_cnn[2].set_title('Model MAE', fontweight='bold')
+    axes_cnn[2].set_xlabel('Epoch')
+    axes_cnn[2].set_ylabel('MAE')
+    axes_cnn[2].set_xticks(epochs)
+    axes_cnn[2].grid(True, linestyle='--', alpha=0.6)
+    axes_cnn[2].legend()
 
     fig_cnn.tight_layout()
     
-    # Merender grafik objek canvas utuh ke halaman web Streamlit
+    # Merender grafik objek canvas 3 kolom secara utuh ke web Streamlit
     st.pyplot(fig_cnn)
     plt.close(fig_cnn)  # Pembersihan sisa cache RAM server
 
+    
     
     
 # --- BQ1: PERFORMA OCR ---
